@@ -1,0 +1,88 @@
+
+<div class="container">            
+    <div class="row">
+        <div class="col-xl-5 col-lg-6 col-md-8 col-sm-10 mx-auto text-center form p-4 ">
+            <div class="card card-center">
+                <div class="card-header">
+                    <h4>INGRESA TUS CREDENCIALES</h4>
+                </div>                    
+                <div class="px-2 m-5">                        
+                    <form class="justify-content-center" action="javascript:void(0);">
+                        <div class="form-group p-2">
+                            <label class="sr-only">Usuario</label>
+                            {{!-- <input type="text" class="form-control" name="xuser" id="xuser" placeholder="Usuario" required> --}}
+                            <select class="custom-select mr-sm-2" id="xuser">
+                            <option value=""> -- Selecciona usuario -- </option>                            
+                                {{#each xusuarios }}                                    
+                                    <option value="{{nom_usuario}}">{{nom_usuario}}</option>
+                                {{/each}}                            
+                            </select>
+                        </div>
+                        <div class="form-group p-2">
+                            <label class="sr-only">Password</label>
+                            <input type="password" name="xpass" id="xpass" class="form-control" placeholder="Password" required>
+                        </div>
+                        <button type="button" id="btnEnviar" onclick="xlog()" class="btn btn-primary btn-block">Entrar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    var input = document.getElementById("xpass");
+    input.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) { //CODE 13 TECLA ENTER...
+            event.preventDefault();
+            //xlog();
+            document.getElementById("btnEnviar").click();
+        }
+    }); 
+
+    function xlog() 
+    {
+        let usuario = $('#xuser').val();
+        let password = $('#xpass').val();
+        let data = {
+            usuario,
+            password
+        } 
+
+        if(data.usuario.trim() != "" && data.usuario.trim() != "" )
+        {
+            $.ajax({
+                method: 'POST',
+                data: data,            
+                url: '/auth/autenticar',
+                success: function (response) {                                   
+
+                    if(response.status)
+                    {
+                        sessionStorage.setItem("authorization", response.token);
+                        window.location.href = "/desktop/init";
+                        let html = response.msg;
+                        $('#txtResult').html(html);
+                        $("#modalMessage").modal('show');
+                    }
+                    else
+                    {
+                        let hmlError = response.msg;
+                        $('#txtResult').html(hmlError);
+                        $("#modalMessage").modal('show');               
+                    }
+                }
+            });
+
+        }
+        else
+        {
+            let hmlError = ' - Debes ingresar tus credenciales.';
+            $('#txtResult').html(hmlError);
+            $("#modalMessage").modal('show');
+        }        
+
+    } // END FUNCTION xlog
+</script>

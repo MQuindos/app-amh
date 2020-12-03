@@ -1,0 +1,302 @@
+
+
+
+
+<div class="container p-2">
+
+    {{!-- <div class="jumbotron"> --}}
+        <div class="row p-3">    
+            <div class="col-12 text-center">
+                <p class="font-weight-bold text-dark">  CARGA ARCHIVO A PROCESAR</p>
+            </div>
+        </div>
+
+        <div class="row p-4">            
+            <div class="col-6">
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" onchange="fn_Obtiene(this)" id="idFileUpload" lang="es" accept=".xlsx,.xls">
+                    <label class="custom-file-label" id="textFileUpload" for="idFileUpload">Seleccionar Archivo</label>
+                </div>
+            </div>
+        </div>
+
+    {{!-- </div> --}}
+<hr>    
+    <hr>    
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">PENDIENTES</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="list-tab" data-toggle="tab" href="#list" role="tab" aria-controls="list" aria-selected="false">PROCESADOS</a>
+  </li>
+  
+</ul>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+    
+    <div class="row">    
+        <div class="col-12 text-center">
+            <p class="font-weight-bold text-dark">REGISTROS A PROCESAR</p>
+        </div>
+    </div>
+
+    <div class="row p-3">
+        <div class="col-4">
+            <button type="button" title="PROCESAR REGISTROS" id="btnProcesar" class="btn btn-success btn-lm">PROCESAR</button>
+            <button type="button" title="ELIMINAR REGISTROS DE LA TABLA" id="btnEliminar" class="btn btn-danger btn-lm">ELIMINAR TODOS</button>
+        </div>    
+    </div>
+
+    <div class="row pl-3 pr-3">
+        <div class="table-responsive">
+        <table class="table table-hover table-sm">
+        <thead>
+            <tr>
+            <th scope="col ">#</th>
+            {{!-- <th scope="col">ESTADO</th> --}}
+            {{!-- <th scope="col ">FECHA SUBIDA</th> --}}
+            <th scope="col">ARRENDATARIO</th>
+            <th scope="col">N° CONTRATO</th>
+            <th scope="col">FECHA PAGO</th>
+            <th scope="col">MONTO</th>
+            
+            <th scope="col">CTA CTE</th>
+            <th scope="col">PROPIEDAD</th>
+
+            {{!-- <th scope="col">EDITAR</th>
+            <th scope="col">ELIMINAR</th> --}}
+            </tr>
+        </thead>
+        <tbody>
+            <div id="xdata">
+            {{#each links}}
+            
+                <tr>
+                    <th scope="row">{{id}}</th>
+                    {{!-- <td>{{estado}}</td> --}}
+                    {{!-- <td> {{fechacarga}}</td> --}}
+                    <td>{{arrendatarrio}}</td>
+                    <td>{{numcontrato}}</td>
+
+                    <td>{{fechapago}}</td>
+                    <td>{{totalpagado}}</td>
+                    
+                    <td>{{ctacte}}</td>
+                    <td>{{propiedad}}</td>
+                </tr>
+
+            {{else}}
+
+                <tr>
+                    <th scope="row"></th>
+                    
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+                <script>
+                    document.getElementById("btnProcesar").disabled = true;
+                    document.getElementById("btnEliminar").disabled = true;
+                </script>
+
+            {{/each}}
+        </div>                
+        </tbody>
+        </table>
+        </div>
+    </div> <!-- DIV ROW TABLE -->
+
+
+</div>
+  <div class="tab-pane fade" id="list" role="tabpanel" aria-labelledby="list-tab">
+
+
+      <div class="row">    
+        <div class="col-12 text-center">
+            <p class="font-weight-bold text-dark">REGISTROS PROCESADOS</p>
+        </div>
+    </div>
+<div class="row p-3"></div>
+    <div class="row pl-3 pr-3">
+        <div class="table-responsive">
+        <table class="table table-hover table-sm">
+        <thead>
+            <tr>
+                <th scope="col ">#</th>
+                {{!-- <th scope="col">ESTADO</th> --}}
+                <th scope="col ">FECHA PROCESADO</th>
+                <th scope="col">ARRENDATARIO</th>
+                <th scope="col">N° CONTRATO</th>
+                <th scope="col">FECHA PAGO</th>
+                <th scope="col">MONTO</th>
+                
+                <th scope="col">CTA CTE</th>
+                <th scope="col">PROPIEDAD</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            <div id="xdata">
+            {{#each dataProcesados}}            
+                <tr>
+                    <th scope="row">{{id}}</th>
+                    {{!-- <td>{{estado}}</td> --}}
+                    <td> {{fechaprocesado}}</td>
+                    <td>{{arrendatarrio}}</td>
+                    <td>{{numcontrato}}</td>
+
+                    <td>{{fechapago}}</td>
+                    <td>{{totalpagado}}</td>
+                    
+                    <td>{{ctacte}}</td>
+                    <td>{{propiedad}}</td>
+                </tr>
+
+            {{else}}
+
+                <tr>
+                    <th scope="row"></th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+            {{/each}}
+        </div>                
+        </tbody>
+        </table>
+        </div>
+    </div> <!-- DIV ROW TABLE -->
+
+
+
+
+  </div>
+  {{!-- <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">...</div> --}}
+</div>
+
+</div> <!-- DIV CONTAINER-->
+
+<script type="text/javascript" >
+
+
+
+function fn_Obtiene(inFile) {
+    
+    document.getElementById("textFileUpload").innerHTML = inFile.files[0].name;
+    //inFile[0].files[0].name
+    let file = inFile.files[0];
+    
+    var data = new FormData();    
+    data.append('file', file);
+
+    $.ajax({
+        method: 'POST',
+        processData: false,
+        contentType: false,
+        cache: false,
+        data: data,
+        enctype: 'multipart/form-data',
+        url: '/fileprocesa',
+        success: function (response) {
+
+            if(response.status)
+            {
+                alert(response.message);
+            }
+            else
+            {
+                alert(response.message + ', comprueba archivo e intente nuevamente, si persiste el problema contacte al ADMIN');
+            }
+
+            window.location.reload();
+            
+        }
+    });
+
+
+  /*  $.ajax({
+    type: "POST",
+    url: "/fileprocesa",
+    data: dataFile,
+    success:function(datos){ //success es una funcion que se utiliza si el servidor retorna informacion
+                console.log(datos)
+            },
+    dataType: "text/html"
+    });
+*/
+    
+}
+
+document.getElementById('btnProcesar').addEventListener('click', function () {
+
+    if (!confirm('Esta seguro que desea procesar los registros??')) {
+             event.preventDefault();
+    }
+    else {           
+
+        $.ajax({
+            type: "POST",
+            url: "/procesarPagoMQSISX",        
+            success:function(datos){ //success es una funcion que se utiliza si el servidor retorna informacion
+
+                        console.log(datos);
+                alert("PROCESO INICIADO");            
+                window.location.reload();
+            }
+            
+        });
+
+    }
+    
+ });
+
+document.getElementById('btnEliminar').addEventListener('click', function () {
+
+if (!confirm('Esta seguro que desea Eliminar los registros??')) {
+             event.preventDefault();
+    }
+    else 
+    {   
+        $.ajax({
+            type: "get",
+            url: "/deleteDataAMH",        
+            success:function(datos){ //success es una funcion que se utiliza si el servidor retorna informacion
+                
+                if(datos.status)
+                {
+                    alert("REGISTROS ELIMINADOS");
+                }
+                else
+                {
+                    alert("PROBLEMAS AL PROCESAR");
+                }
+
+                window.location.reload();
+                
+            }
+            
+        });
+    }
+    
+ });
+
+
+
+function getData(){
+
+        console.log('Click en getData()');        
+    
+}
+    
+</script>

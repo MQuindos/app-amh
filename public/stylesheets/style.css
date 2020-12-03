@@ -1,0 +1,52 @@
+body {
+    padding: 50px;
+    font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+    color: #00B7FF;
+}
+
+
+/* #cover {
+    background: #222 url('https://unsplash.it/1920/1080/?random') center center no-repeat;
+    background-size: cover;
+    height: 100%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    position: relative;
+} */
+
+#cover-caption {
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+
+/* only used for background overlay not needed for centering */
+
+form:before {
+    content: '';
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: -1;
+    border-radius: 10px;
+}
+
+.tit-destacados {
+    color: #003366;
+    font-family: 'Assistant', sans-serif;
+    font-size: 25px;
+    margin-top: 50px;
+    text-transform: uppercase;
+}
+
+.titulos {
+    color: #002f5f;
+}

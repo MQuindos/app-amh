@@ -1,0 +1,45 @@
+
+<style>
+  .modal-body{
+  max-height: 450px;
+  /*min-height: 400px;*/
+  width: 100%;
+  overflow-y: auto;
+  }
+  
+  .overflow-visible {
+  white-space: initial;
+  }
+
+.pclass {
+  width: 350px;
+  font-size: small;
+}
+
+</style>
+
+<!-- Modal -->
+<div class="modal fade" id="modalCart" >
+  <div class="modal-dialog modal-xl" >
+    <div class="modal-content">
+      <!--Header-->
+      <div class="modal-header">
+        <h4 class="modal-title" id="titlePropiedad">Liquidación</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <!--Body-->
+      <div class="modal-body" style="min-height: 400px;">
+
+        <div id="detalleContenido" ></div>
+
+      </div>
+      <!--Footer-->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>        
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal: modalCart -->

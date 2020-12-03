@@ -1,0 +1,49 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files (x86)\\nodejs\\\\node.exe',
+1 verbose cli   'C:\\Program Files (x86)\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'install',
+1 verbose cli   '-g',
+1 verbose cli   'npm@6.1.4' ]
+2 info using npm@1.2.11
+3 info using node@v0.8.20
+4 verbose node symlink C:\Program Files (x86)\nodejs\\node.exe
+5 verbose read json C:\Users\administrador.MQ\AppData\Roaming\npm\package.json
+6 verbose read json C:\Users\administrador.MQ\AppData\Roaming\npm\package.json
+7 verbose cache add [ 'npm@6.1.4', null ]
+8 verbose cache add name=undefined spec="npm@6.1.4" args=["npm@6.1.4",null]
+9 verbose parsed url { pathname: 'npm@6.1.4', path: 'npm@6.1.4', href: 'npm@6.1.4' }
+10 verbose cache add name="npm" spec="6.1.4" args=["npm","6.1.4"]
+11 verbose parsed url { pathname: '6.1.4', path: '6.1.4', href: '6.1.4' }
+12 verbose addNamed [ 'npm', '6.1.4' ]
+13 verbose addNamed [ '6.1.4', '6.1.4' ]
+14 silly lockFile ff583e54-npm-6-1-4 npm@6.1.4
+15 verbose lock npm@6.1.4 C:\Users\administrador.MQ\AppData\Roaming\npm-cache\ff583e54-npm-6-1-4.lock
+16 verbose url raw npm/6.1.4
+17 verbose url resolving [ 'https://registry.npmjs.org/', './npm/6.1.4' ]
+18 verbose url resolved https://registry.npmjs.org/npm/6.1.4
+19 info trying registry request attempt 1 at 00:30:05
+20 http GET https://registry.npmjs.org/npm/6.1.4
+21 silly lockFile ff583e54-npm-6-1-4 npm@6.1.4
+22 silly lockFile ff583e54-npm-6-1-4 npm@6.1.4
+23 error Error: SSL Error: CERT_UNTRUSTED
+23 error     at ClientRequest.<anonymous> (C:\Program Files (x86)\nodejs\node_modules\npm\node_modules\request\main.js:525:26)
+23 error     at ClientRequest.g (events.js:192:14)
+23 error     at ClientRequest.EventEmitter.emit (events.js:96:17)
+23 error     at HTTPParser.parserOnIncomingClient (http.js:1569:7)
+23 error     at HTTPParser.parserOnHeadersComplete [as onHeadersComplete] (http.js:111:23)
+23 error     at CleartextStream.socketOnData (http.js:1472:20)
+23 error     at CleartextStream.CryptoStream._push (tls.js:544:27)
+23 error     at SecurePair.cycle (tls.js:898:20)
+23 error     at EncryptedStream.CryptoStream.write (tls.js:285:13)
+23 error     at Socket.ondata (stream.js:38:26)
+24 error If you need help, you may report this log at:
+24 error     <http://github.com/isaacs/npm/issues>
+24 error or email it to:
+24 error     <npm-@googlegroups.com>
+25 error System Windows_NT 6.2.9200
+26 error command "C:\\Program Files (x86)\\nodejs\\\\node.exe" "C:\\Program Files (x86)\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "install" "-g" "npm@6.1.4"
+27 error cwd D:\Sitios\app-cargaprocesa-amh
+28 error node -v v0.8.20
+29 error npm -v 1.2.11
+30 error code ESSL
+31 verbose exit [ 1, true ]

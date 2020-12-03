@@ -1,0 +1,40 @@
+{
+    "name": "app-cargaprocesa-amh",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "nodemon ./bin/www",
+        "start": "node ./bin/www"
+    },
+    "dependencies": {
+        "bootstrap-select": "^1.13.18",
+        "child_process": "^1.0.2",
+        "cookie-parser": "~1.4.4",
+        "debug": "~2.6.9",
+        "dotenv": "^8.2.0",
+        "express": "~4.16.1",
+        "express-handlebars": "^4.0.4",
+        "express-session": "^1.17.1",
+        "formidable": "^1.2.2",
+        "fs": "0.0.1-security",
+        "fs-extra": "^9.0.1",
+        "hbs": "^4.1.1",
+        "http-errors": "~1.6.3",
+        "jsonwebtoken": "^8.5.1",
+        "md5": "^2.2.1",
+        "mime": "^2.4.6",
+        "moment": "^2.27.0",
+        "morgan": "~1.9.1",
+        "mssql": "^6.2.0",
+        "multer": "^1.4.2",
+        "nodemailer": "^6.4.16",
+        "path": "^0.12.7",
+        "puppeteer": "^5.3.0",
+        "sequelize": "^5.10.2",
+        "sequelize-cli": "^5.5.0",
+        "xlsx": "^0.16.0"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.4"
+    }
+}

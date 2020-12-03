@@ -1,0 +1,35 @@
+[21-06-2020 03:25:06]  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[21-06-2020 03:25:06] Procesando ID :[1] Fecha Proceso :[22-04-2020] Fecha Contable: [22-04-2020]
+[21-06-2020 03:25:06] Servidor de BD : [MQVSDES01\SQLEXPRESSDESA] Usuario:[sa]
+[21-06-2020 03:25:07] Ejecutando Subrutina :[sub_ProcesarPagosAMH] ID :[1]
+[21-06-2020 03:25:11]  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[21-06-2020 03:25:11] Procesando ID :[2] Fecha Proceso :[22-04-2020] Fecha Contable: [22-04-2020]
+[21-06-2020 03:25:11] Servidor de BD : [MQVSDES01\SQLEXPRESSDESA] Usuario:[sa]
+[21-06-2020 03:25:12] Ejecutando Subrutina :[sub_ProcesarPagosAMH] ID :[2]
+[21-06-2020 03:25:32] Salida Inesperada por Error...Revisar desde el últimpo mensaje log
+[21-06-2020 03:25:32] Salida Inesperada por Error...Revisar desde el últimpo mensaje log
+[21-06-2020 03:26:29]  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[21-06-2020 03:26:29] Procesando ID :[1] Fecha Proceso :[22-04-2020] Fecha Contable: [22-04-2020]
+[21-06-2020 03:26:29] Servidor de BD : [MQVSDES01\SQLEXPRESSDESA] Usuario:[sa]
+[21-06-2020 03:26:30] Ejecutando Subrutina :[sub_ProcesarPagosAMH] ID :[1]
+[21-06-2020 03:26:37] Salida Inesperada por Error...Revisar desde el últimpo mensaje log
+[21-06-2020 03:26:37]  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[21-06-2020 03:26:37] Procesando ID :[2] Fecha Proceso :[22-04-2020] Fecha Contable: [22-04-2020]
+[21-06-2020 03:26:37] Servidor de BD : [MQVSDES01\SQLEXPRESSDESA] Usuario:[sa]
+[21-06-2020 03:26:38] Ejecutando Subrutina :[sub_ProcesarPagosAMH] ID :[2]
+[21-06-2020 03:26:45] Salida Inesperada por Error...Revisar desde el últimpo mensaje log
+[21-06-2020 03:35:18]  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[21-06-2020 03:35:18] Procesando ID :[1] Fecha Proceso :[22-04-2020] Fecha Contable: [22-04-2020]
+[21-06-2020 03:35:18] Servidor de BD : [MQVSDES01\SQLEXPRESSDESA] Usuario:[sa]
+[21-06-2020 03:35:18] Ejecutando Subrutina :[sub_ProcesarPagosAMH] ID :[1]
+[21-06-2020 03:35:26]  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[21-06-2020 03:35:26] Procesando ID :[2] Fecha Proceso :[22-04-2020] Fecha Contable: [22-04-2020]
+[21-06-2020 03:35:26] Servidor de BD : [MQVSDES01\SQLEXPRESSDESA] Usuario:[sa]
+[21-06-2020 03:35:26] Salida Inesperada por Error...Revisar desde el últimpo mensaje log
+[21-06-2020 03:35:26] Ejecutando Subrutina :[sub_ProcesarPagosAMH] ID :[2]
+[21-06-2020 03:35:33] Salida Inesperada por Error...Revisar desde el últimpo mensaje log
+[21-06-2020 03:35:42]  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[21-06-2020 03:35:42] Procesando ID :[2] Fecha Proceso :[22-04-2020] Fecha Contable: [22-04-2020]
+[21-06-2020 03:35:42] Servidor de BD : [MQVSDES01\SQLEXPRESSDESA] Usuario:[sa]
+[21-06-2020 03:35:42] Ejecutando Subrutina :[sub_ProcesarPagosAMH] ID :[2]
+[21-06-2020 03:35:49] Salida Inesperada por Error...Revisar desde el últimpo mensaje log

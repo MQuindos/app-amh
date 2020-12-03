@@ -1,0 +1,97 @@
+<style>
+    .titulos{
+    color: #002f5f;
+    
+}
+
+.tableFixHead thead th { 
+    position: sticky; 
+    top: 0%; 
+    background-color: white;
+    }
+.scroll {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+</style>
+
+<div class="container p-1">
+    
+        <div class="row">    
+            <div class="col-12 p-3">
+                <h5 class="font-weight-bold titulos text-center"><i> CÁLCULO DE COMISIONES</i></h5>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header font-weight-bold titulos">
+                Comisión Administración y Asesoría
+            </div>
+            <div class="card-body scroll">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-responsive-sm ">
+                        <table class="table table-hover table-striped table-sm tableFixHead ">
+                            <thead>
+                                <tr>                              
+                                    <th class="titulos" scope="col">#</th>
+                                    <th class="titulos" scope="col">Código</th>
+                                    <th class="titulos" scope="col">Total Abonos</th>
+                                    <th class="titulos" scope="col">Total Cargos</th>
+                                    <th class="titulos" scope="col">Total</th>                                    
+                                    <th class="titulos" scope="col">% Comisión</th>
+                                    <th class="titulos" scope="col">Total Comisión</th>
+                                    <th class="titulos" scope="col">% Asesoría</th>
+                                    <th class="titulos" scope="col">Monto Asesoría</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each data}}
+                                <tr>
+                                    <td> {{ incremented @index }}</td>
+                                    <td>{{codigo}}</td>                                    
+                                    <td  >{{numberFormat TOTALABONO}}</td>
+                                    <td>{{numberFormat TOTALCARGO }}</td>
+                                    <td style=" {{#if (lt montoaliq 0) }} color:#F40E26 {{/if}}" >{{numberFormat montoaliq}}</td>
+                                    {{#if (ne comi_admin "") }}
+                                        <td> {{comi_admin}} %</td>
+                                    {{else}}
+                                        <td> {{comi_admin}}</td>
+                                    {{/if}}
+                                    <td style=" {{#if (lt total_comi_adm 0) }} color:#F40E26 {{/if}}" >{{numberFormat total_comi_adm}}</td>
+                                    {{#if (ne comi_asesor "" )}}
+                                        <td >{{comi_asesor}} %</td>
+                                    {{else}}
+                                        <td>{{comi_asesor}}</td>
+                                    {{/if}}
+
+                                    <td style=" {{#if (lt total_comi_asesor 0) }} color:#F40E26 {{/if}}">{{numberFormat total_comi_asesor}}</td>
+                                </tr>
+                                {{/each}}                 
+                            </tbody>
+                        </table>
+                    </div>
+                  </div>
+                    
+                </div>               
+            </div>            
+        </div> <!-- END CARD-->
+        <hr>
+        <div class="row">            
+                <div class="col-8">
+
+                </div>                   
+                
+                <div class="col-1">
+                    <div class="spinner-border" role="status" hidden="true" id="idLoadComision">
+                        <span class="sr-only">Cargando...</span>
+                    </div>
+                </div>
+                <div class="col-2">
+                    <button type="button" title="Generar comsión administración y asesorias" id="btnGenerarAsesoriaComision" class="btn btn-success btn-sm">Generar Cargos</button>
+                </div>
+            </div>
+       
+    <hr>
+
+</div>
