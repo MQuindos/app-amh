@@ -15,7 +15,7 @@ async function getPathComprobantePago_Amh() {
                 , ncontrato
                 , patharchivo as pathf
             from amh_pathcomprobante 
-            where estado = 1 and fecha > getdate() -1
+            where estado = 1 and fecha > getdate() -1;
         `;
 
         let data = await pool1.query(qy);
