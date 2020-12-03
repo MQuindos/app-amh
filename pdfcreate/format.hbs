@@ -379,8 +379,8 @@
     <meta charset="utf-8">
 </head>
 
-<body>       
-        
+<body>
+
     <div class="container">
         <p>
             <div style="text-align: right;padding-right:30px;"> <b>N° {{idpdf}}</b>   </div>
@@ -401,166 +401,166 @@
             </div>
         </div>
         <br>
-                <div class="card">
-                    <div class="container">
-                        <h4><b>I.- Resumen movimientos propiedades </b></h4>
-        
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>                                    
-                                    <th scope="col">Propiedad</th>
-                                    <th scope="col">Arrendatario</th>
-                                    <th scope="col">Ingresos</th>
-                                    <th scope="col">Egresos</th>
-                                    <th scope="col">Saldo a Liquidar</th>
-                                </tr>
-                            </thead>
-                            <tbody>                                    
-                                {{#each resu}}
-                                    <tr>                                        
-                                        <td>{{INMUEBLE}}</td>
-                                        <td>{{ARRENDATARIO}}</td>
-                                        <td>{{numberFormat INGRESOS}}</td>
-                                        <td>{{numberFormat EGRESOS}}</td>
-                                        <td>{{numberFormat SALDO_A_LIQUIDAR}}</td>
-                                    </tr>
-                                {{else}}
-                                    <tr>                                        
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                {{/each}}
-        
-                            </tbody>
-                        </table>        
-                    </div>
-                </div>        
+        <div class="card">
+            <div class="container">
+                <h4><b>I.- Resumen movimientos propiedades </b></h4>
+
+                <table class="table table-sm">
+                    <thead>
+                        <tr>                                    
+                            <th scope="col">Propiedad</th>
+                            <th scope="col">Arrendatario</th>
+                            <th scope="col">Ingresos</th>
+                            <th scope="col">Egresos</th>
+                            <th scope="col">Saldo a Liquidar</th>
+                        </tr>
+                    </thead>
+                    <tbody>                                    
+                        {{#each resu}}
+                            <tr>                                        
+                                <td>{{INMUEBLE}}</td>
+                                <td>{{ARRENDATARIO}}</td>
+                                <td>{{numberFormat INGRESOS}}</td>
+                                <td>{{numberFormat EGRESOS}}</td>
+                                <td>{{numberFormat SALDO_A_LIQUIDAR}}</td>
+                            </tr>
+                        {{else}}
+                            <tr>                                        
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        {{/each}}
+
+                    </tbody>
+                </table>        
+            </div>
+        </div>        
         <br>
-                <div class="card">
-                    <div class="container">
-                        <h4><b>II.- Gastos generales </b></h4>
-        
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Fecha</th>
-                                    <th scope="col">Item</th>
-                                    <th scope="col">Monto</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{#each gb}}
+        <div class="card">
+            <div class="container">
+                <h4><b>II.- Gastos generales </b></h4>
 
-                                    {{#if (ne id_mov 6) }}
-                                        {{#if (ne id_mov 17) }}
-                                            <tr>
-                                                <td>{{FECHA}}</td>
-                                                <td>{{MOV}}</td>
-                                                <td>{{numberFormat MONTO }}</td>
-                                            </tr>
-                                        {{/if}}
-                                    {{/if}}
-                                {{else}}
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Item</th>
+                            <th scope="col">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each gb}}
+
+                            {{#if (ne id_mov 6) }}
+                                {{#if (ne id_mov 17) }}
                                     <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                {{/each}}
-                            </tbody>
-                        </table>        
-                    </div>
-                </div>
-            <br>
-                <div class="card">
-                    <div class="container">
-                        <h4>
-                            <b>III.- Totales </b>
-                        </h4>        
-                        <table class="table table-sm">
-                            <tbody>
-                                <tr>
-                                    <td>Comisión Administración</td>
-                                {{#each totalLiquidacionComision}}
-
-                                    {{#if (eq id_mov 6) }} 
-                                            <td>{{numberFormat MONTO}}</td>
-                                        </tr>
-                                    {{/if}}
-                                    
-                                {{else}}
-
-                                        <td></td>
-                                    </tr>
-                                      
-                                {{/each}}   
-
-                                    <tr>
-                                       <td><b>Total Liquidación</b></td>
-                                {{#each totalLiquidacionComision}}
-
-                                    {{#if (eq id_mov 17) }}
-                                            
-                                                <td><b>{{numberFormat MONTO}}</b></td>
-                                            </tr>     
-                                    {{/if}}
-                                {{else}}
-
-                                        <td></td>
-                                    </tr>   
-                                {{/each}}  
-                            </tbody>
-                        </table>        
-                    </div>
-                </div>
-            <br>        
-                <div class="card">
-                    <div class="container">
-                        <h4><b>IV.- Detalle movimientos propiedades </b></h4>
-        
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Fecha</th>
-                                    <th scope="col">Propiedad</th>
-                                    <th scope="col">Descripción</th>
-                                    <th scope="col">Cargo</th>
-                                    <th scope="col">Abono</th>
-                                    <th scope="col">Saldo</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{#each det}}                         
-                                    
-                                    <tr>
-                                        <th scope="row">{{ID}}</th>
                                         <td>{{FECHA}}</td>
-                                        <td>{{PROPIEDAD}}</td>
-                                        <td>{{DESCRIPCION}}</td>
-                                        <td>{{numberFormat CARGO}}</td>
-                                        <td>{{numberFormat ABONO}}</td>
-                                        <td>{{numberFormat TOTALDETALLE }}</td>
+                                        <td>{{MOV}}</td>
+                                        <td>{{numberFormat MONTO }}</td>
                                     </tr>
-                                {{else}}
-                                    <tr>
-                                        <th scope="row"></th>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                {{/each}}
-                            </tbody>
+                                {{/if}}
+                            {{/if}}
+                        {{else}}
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>        
+            </div>
+        </div>
+            <br>
+        <div class="card">
+            <div class="container">
+                <h4>
+                    <b>III.- Totales </b>
+                </h4>        
+                <table class="table table-sm">
+                    <tbody>
+                        <tr>
+                            <td>Comisión Administración</td>
+                        {{#each totalLiquidacionComision}}
 
-                        </table>        
-                    </div>
-                </div>
+                            {{#if (eq id_mov 6) }} 
+                                    <td>{{numberFormat MONTO}}</td>
+                                </tr>
+                            {{/if}}
+                            
+                        {{else}}
+
+                                <td></td>
+                            </tr>
+                                
+                        {{/each}}   
+
+                            <tr>
+                                <td><b>Total Liquidación</b></td>
+                        {{#each totalLiquidacionComision}}
+
+                            {{#if (eq id_mov 17) }}
+                                    
+                                        <td><b>{{numberFormat MONTO}}</b></td>
+                                    </tr>     
+                            {{/if}}
+                        {{else}}
+
+                                <td></td>
+                            </tr>   
+                        {{/each}}  
+                    </tbody>
+                </table>        
+            </div>
+        </div>
+            <br>        
+        <div class="card">
+            <div class="container">
+                <h4><b>IV.- Detalle movimientos propiedades </b></h4>
+
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Propiedad</th>
+                            <th scope="col">Descripción</th>
+                            <th scope="col">Cargo</th>
+                            <th scope="col">Abono</th>
+                            <th scope="col">Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each det}}                         
+                            
+                            <tr>
+                                <th scope="row">{{ID}}</th>
+                                <td>{{FECHA}}</td>
+                                <td>{{PROPIEDAD}}</td>
+                                <td>{{DESCRIPCION}}</td>
+                                <td>{{numberFormat CARGO}}</td>
+                                <td>{{numberFormat ABONO}}</td>
+                                <td>{{numberFormat TOTALDETALLE }}</td>
+                            </tr>
+                        {{else}}
+                            <tr>
+                                <th scope="row"></th>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+
+                </table>        
+            </div>
+        </div>
             <br>
         </div>
     </body>

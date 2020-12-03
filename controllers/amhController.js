@@ -32,11 +32,115 @@ async function getPathComprobantePago_Amh() {
             status : false,
             message : error.message
         }
+    }    
+}
+
+
+/**
+ * Retorna información de los movimientos de entrada a la caja, de acuerdo a la fecha enviada.
+ * @param {Fecha de los movimientos formato(dd-mm-aaaa)} xfecha 
+ */
+async function getMovCajaEnt_PorFecha(xfecha )
+{
+    try 
+    {
+        if(xfecha !== '') 
+        {        
+            let rs = await pool1.connect(); // Obtenemos la conexion
+            //[sp_movcajaent_now_LeerXFecha]
+            let qy = `
+                    SELECT idmovcaj,idmovcajdia,idcomprobante,codigo,cod_propiedad,cod_arrendatario
+                        ,cod_tipdocto,cod_tipcta,cod_tipmovto,glosa,monto,fecha,hora
+                        ,persona,nulo,genera,estado,fecha_liq,liq_temp,liq_acum,sel_movarr,comi_cobrada
+                    FROM movcajaent_now
+                    WHERE fecha = CONVERT(DATETIME,` + xfecha + `)
+                    ORDER BY idmovcajdia
+                `;
+
+            let data = await pool1.query(qy);
+
+            return {
+                status : true,
+                data : data.recordset
+            }
+
+        } 
+        else 
+        {
+            return {
+                status: false,
+                message:'Parámetro vacío'
+            }    
+        }
+
+    } catch (error) {
+
+        return {
+            status: false,
+            message:error.message
+        }
     }
-    
+}
+
+
+async function getDataVista() {
+
+    try {
+        //NO PROCESADOS
+        let rs = await pool1.connect(); // Obtenemos la conexion
+        let qy = 'Select proces_id id ' +
+            ' ,concat(convert(varchar(10),proces_fecha_carga,105),\' \'' +
+            ' ,convert(varchar(5),proces_fecha_carga,108)) fechacarga ' +
+            ' ,archi_nombre_arrendatario as arrendatarrio,archi_numero_operacion as numcontrato ' +
+            ' ,concat(convert(varchar(15),archi_fecha_pago,105), \' \',convert(varchar(5),archi_fecha_pago,108) ) as fechapago ' +
+            ' , archi_monto_pago totalpagado,\'Pendiente\' as estado' +
+            ' ,DR.archi_cuenta_cliente as ctacte ' +
+            ' ,DCD.cc_propiedades as propiedad ' +
+            ' from amh_data_retorno DR ' +
+            ' inner join amh_detallepago_ccierta_dataretorno DCD on DR.proces_id = DCD.ret_proces_id ' +
+            ' where proces_estado = 1 ';
+        let requestAdd = pool1.request(); // or: new sql.Request(pool1)
+        let links = await requestAdd.query(qy);
+        let linksReturn = links.recordsets[0];
+
+        //PROCESADOS
+        let rsP = await pool1.connect(); // Obtenemos la conexion
+        let qyP = 'Select proces_id id ' +
+            ' ,concat(convert(varchar(10),proces_fecha_carga,105),\' \'' +
+            ' ,convert(varchar(5),proces_fecha_carga,108)) fechacarga ' +
+            ' ,archi_nombre_arrendatario as arrendatarrio,archi_numero_operacion as numcontrato ' +
+            ' ,concat(convert(varchar(15),archi_fecha_pago,105), \' \',convert(varchar(5),archi_fecha_pago,108) ) as fechapago ' +
+            ' , archi_monto_pago totalpagado,\'Procesado\' as estado' +
+            ' ,DR.archi_cuenta_cliente as ctacte ' +
+            ' ,DCD.cc_propiedades as propiedad ' +
+            ' ,concat(convert(varchar(15),proces_fecha_procesado,105), \' \',convert(varchar(5),proces_fecha_procesado,108) ) as fechaprocesado ' +
+            ' from amh_data_retorno DR ' +
+            ' inner join amh_detallepago_ccierta_dataretorno DCD on DR.proces_id = DCD.ret_proces_id ' +
+            ' where proces_estado = 2 order by proces_fecha_procesado desc; ';
+        let requestAddP = pool1.request(); // or: new sql.Request(pool1)
+        let linksProcesado = await requestAddP.query(qyP);
+        let linksProcess = linksProcesado.recordsets[0];
+
+        return {
+            status: true,
+            linksProcess,
+            linksReturn
+        }
+
+    } catch (err) {
+
+        console.error('SQL error', err);
+        return {
+            status: false,
+            linksProcess,
+            linksReturn
+        }
+    }
 }
 
 module.exports = {
-    getPathComprobantePago_Amh
+    getPathComprobantePago_Amh,
+    getMovCajaEnt_PorFecha,
+    getDataVista
 }
 

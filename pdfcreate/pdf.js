@@ -5,7 +5,22 @@ const hbs = require("handlebars");
 const moment = require('moment');
 
 const liquidacion = require('../controllers/liquidacionController');
+const amh = require('../controllers/amhController');
 
+
+/***###################################################################
+ *      AMH
+ * ####################################################################
+ */
+
+
+
+ 
+
+/***###################################################################
+ *      LIQUIDACION
+ * ####################################################################
+ */
 async function getData(numCuenta,xPeriodo) {
     try {       
         
@@ -153,8 +168,6 @@ async function createPDF(numCuenta, xPeriodo , xnombreUsuario) {
                 message : 'Problemas al crear archivo pdf, favor intenta nuevamente.'
             }
         }
-
-        
 
     } catch (error) {       
 

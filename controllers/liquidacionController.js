@@ -798,52 +798,6 @@ async function comisiones_por_ctacte_periodoactual(xncuenta) {
     }
 }
 
-/**
- * Retorna información de los movimientos de entrada a la caja, de acuerdo a la fecha enviada.
- * @param {Fecha de los movimientos formato(dd-mm-aaaa)} xfecha 
- */
-async function getMovCajaEnt_PorFecha(xfecha )
-{
-    try 
-    {
-        if(xfecha !== '') 
-        {        
-            let rs = await pool1.connect(); // Obtenemos la conexion
-            //[sp_movcajaent_now_LeerXFecha]
-            let qy = `
-                    SELECT idmovcaj,idmovcajdia,idcomprobante,codigo,cod_propiedad,cod_arrendatario
-                        ,cod_tipdocto,cod_tipcta,cod_tipmovto,glosa,monto,fecha,hora
-                        ,persona,nulo,genera,estado,fecha_liq,liq_temp,liq_acum,sel_movarr,comi_cobrada
-                    FROM movcajaent_now
-                    WHERE fecha = CONVERT(DATETIME,` + xfecha + `)
-                    ORDER BY idmovcajdia
-                `;
-
-            let data = await pool1.query(qy);
-
-            return {
-                status : true,
-                data : data.recordset
-            }
-
-        } 
-        else 
-        {
-            return {
-                status: false,
-                message:'Parámetro vacío'
-            }    
-        }
-
-    } catch (error) {
-
-        return {
-            status: false,
-            message:error.message
-        }
-    }
-}
-
 module.exports = {
     getListado_CtaCte,
     getResumenCtaCte_x_nCuenta,
@@ -856,7 +810,7 @@ module.exports = {
     infoOrdenAdministracion,
     getInfoComision,
     getPropiedadesArrendadasXSanCamilo,
-    comisiones_por_ctacte_periodoactual,
-    getMovCajaEnt_PorFecha
+    comisiones_por_ctacte_periodoactual
+
 
 }
