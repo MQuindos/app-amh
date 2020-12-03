@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Liquidacion</title>
+
+    <style type="text/css">
+        body {
+            width: 1200px;
+            font-size: 17px;
+            margin: 2% 0 2% 2%;
+            padding: 0px;
+            line-height: 22px;
+            
+            font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+            color: rgb(33, 33, 33);
+        }
+        
+        .card {
+            /* Add shadows to create the "card" effect */
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.1);
+            padding:4px;
+            /*transition: 0.3s;*/
+        }
+        /* On mouse-over, add a deeper shadow */
+        /* .card:hover {
+            box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+        } */
+        /* Add some padding inside the card container */
+        
+        .container {
+            padding: 2px 2px;
+            width: 98%;
+        }
+        
+        .table {
+            font-size: 16px;
+            width: 99%;
+            margin-bottom: 1rem;
+            color: #212529;
+        }
+        
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .table thead th {
+            vertical-align: bottom;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .table tbody+tbody {
+            border-top: 2px solid #dee2e6;
+        }
+        
+        .table-sm th,
+        .table-sm td {
+            padding: 0.3rem;
+        }
+        
+        .table-bordered {
+            border: 1px solid #dee2e6;
+        }
+        
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid #dee2e6;
+        }
+        
+        .table-bordered thead th,
+        .table-bordered thead td {
+            border-bottom-width: 2px;
+        }
+        
+        .table-borderless th,
+        .table-borderless td,
+        .table-borderless thead th,
+        .table-borderless tbody+tbody {
+            border: 0;
+        }
+        
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .table-hover tbody tr:hover {
+            color: #212529;
+            background-color: rgba(0, 0, 0, 0.075);
+        }
+        
+        .table-primary,
+        .table-primary>th,
+        .table-primary>td {
+            background-color: #b8daff;
+        }
+        
+        .table-primary th,
+        .table-primary td,
+        .table-primary thead th,
+        .table-primary tbody+tbody {
+            border-color: #7abaff;
+        }
+        
+        .table-hover .table-primary:hover {
+            background-color: #9fcdff;
+        }
+        
+        .table-hover .table-primary:hover>td,
+        .table-hover .table-primary:hover>th {
+            background-color: #9fcdff;
+        }
+        
+        .table-secondary,
+        .table-secondary>th,
+        .table-secondary>td {
+            background-color: #d6d8db;
+        }
+        
+        .table-secondary th,
+        .table-secondary td,
+        .table-secondary thead th,
+        .table-secondary tbody+tbody {
+            border-color: #b3b7bb;
+        }
+        
+        .table-hover .table-secondary:hover {
+            background-color: #c8cbcf;
+        }
+        
+        .table-hover .table-secondary:hover>td,
+        .table-hover .table-secondary:hover>th {
+            background-color: #c8cbcf;
+        }
+        
+        .table-success,
+        .table-success>th,
+        .table-success>td {
+            background-color: #c3e6cb;
+        }
+        
+        .table-success th,
+        .table-success td,
+        .table-success thead th,
+        .table-success tbody+tbody {
+            border-color: #8fd19e;
+        }
+        
+        .table-hover .table-success:hover {
+            background-color: #b1dfbb;
+        }
+        
+        .table-hover .table-success:hover>td,
+        .table-hover .table-success:hover>th {
+            background-color: #b1dfbb;
+        }
+        
+        .table-info,
+        .table-info>th,
+        .table-info>td {
+            background-color: #bee5eb;
+        }
+        
+        .table-info th,
+        .table-info td,
+        .table-info thead th,
+        .table-info tbody+tbody {
+            border-color: #86cfda;
+        }
+        
+        .table-hover .table-info:hover {
+            background-color: #abdde5;
+        }
+        
+        .table-hover .table-info:hover>td,
+        .table-hover .table-info:hover>th {
+            background-color: #abdde5;
+        }
+        
+        .table-warning,
+        .table-warning>th,
+        .table-warning>td {
+            background-color: #ffeeba;
+        }
+        
+        .table-warning th,
+        .table-warning td,
+        .table-warning thead th,
+        .table-warning tbody+tbody {
+            border-color: #ffdf7e;
+        }
+        
+        .table-hover .table-warning:hover {
+            background-color: #ffe8a1;
+        }
+        
+        .table-hover .table-warning:hover>td,
+        .table-hover .table-warning:hover>th {
+            background-color: #ffe8a1;
+        }
+        
+        .table-danger,
+        .table-danger>th,
+        .table-danger>td {
+            background-color: #f5c6cb;
+        }
+        
+        .table-danger th,
+        .table-danger td,
+        .table-danger thead th,
+        .table-danger tbody+tbody {
+            border-color: #ed969e;
+        }
+        
+        .table-hover .table-danger:hover {
+            background-color: #f1b0b7;
+        }
+        
+        .table-hover .table-danger:hover>td,
+        .table-hover .table-danger:hover>th {
+            background-color: #f1b0b7;
+        }
+        
+        .table-light,
+        .table-light>th,
+        .table-light>td {
+            background-color: #fdfdfe;
+        }
+        
+        .table-light th,
+        .table-light td,
+        .table-light thead th,
+        .table-light tbody+tbody {
+            border-color: #fbfcfc;
+        }
+        
+        .table-hover .table-light:hover {
+            background-color: #ececf6;
+        }
+        
+        .table-hover .table-light:hover>td,
+        .table-hover .table-light:hover>th {
+            background-color: #ececf6;
+        }
+        
+        .table-hover .table-dark:hover {
+            background-color: #b9bbbe;
+        }
+        
+        .table-hover .table-dark:hover>td,
+        .table-hover .table-dark:hover>th {
+            background-color: #b9bbbe;
+        }
+        
+        .table-active,
+        .table-active>th,
+        .table-active>td {
+            background-color: rgba(0, 0, 0, 0.075);
+        }
+        
+        .table-hover .table-active:hover {
+            background-color: rgba(0, 0, 0, 0.075);
+        }
+        
+        .table-hover .table-active:hover>td,
+        .table-hover .table-active:hover>th {
+            background-color: rgba(0, 0, 0, 0.075);
+        }
+        
+        .table .thead-dark th {
+            color: #fff;
+            background-color: #343a40;
+            border-color: #454d55;
+        }
+        
+        .table .thead-light th {
+            color: #495057;
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
+        
+        .table-dark {
+            color: #fff;
+            background-color: #343a40;
+        }
+        
+        .table-dark th,
+        .table-dark td,
+        .table-dark thead th {
+            border-color: #454d55;
+        }
+        
+        .table-dark.table-bordered {
+            border: 0;
+        }
+        
+        .table-dark.table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .table-dark.table-hover tbody tr:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.075);
+        }
+        
+        @media (max-width: 575.98px) {
+            .table-responsive-sm {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .table-responsive-sm>.table-bordered {
+                border: 0;
+            }
+        }
+        
+        @media (max-width: 767.98px) {
+            .table-responsive-md {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .table-responsive-md>.table-bordered {
+                border: 0;
+            }
+        }
+        
+        @media (max-width: 991.98px) {
+            .table-responsive-lg {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .table-responsive-lg>.table-bordered {
+                border: 0;
+            }
+        }
+        
+        @media (max-width: 1199.98px) {
+            .table-responsive-xl {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .table-responsive-xl>.table-bordered {
+                border: 0;
+            }
+        }
+        
+        .table-responsive {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .table-responsive>.table-bordered {
+            border: 0;
+        }
+        
+        .table-responsive {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .table-responsive>.table-bordered {
+            border: 0;
+        }
+    </style>
+    <meta charset="utf-8">
+</head>
+
+<body>
+
+    <div class="container">
+        <p>
+            <div style="text-align: right;padding-right:30px;"> <b>N° {{idpdf}}</b>   </div>
+            <b>
+            {{nombrePropietario}}<br>
+            <u>Presente</u> <br>
+            </b>
+        </p>
+
+        <p style="text-align: center;"><b> <u>LIQUIDACIÓN</u> </b></p>
+        
+        <div class="card">
+            <div class="container">
+                <p>
+                   Tenemos el agrado de hacer llegar su liquidacion, en caso de alguna consulta, no dude en comunicarse con su ejecutiva de cuenta.<br>
+                   Como equipo Montalva Quindos, agradecemos su confianza y preferencia.
+                </p>
+            </div>
+        </div>
+        <br>
+        <div class="card">
+            <div class="container">
+                <h4><b>I.- Resumen movimientos propiedades </b></h4>
+
+                <table class="table table-sm">
+                    <thead>
+                        <tr>                                    
+                            <th scope="col">Propiedad</th>
+                            <th scope="col">Arrendatario</th>
+                            <th scope="col">Ingresos</th>
+                            <th scope="col">Egresos</th>
+                            <th scope="col">Saldo a Liquidar</th>
+                        </tr>
+                    </thead>
+                    <tbody>                                    
+                        {{#each resu}}
+                            <tr>                                        
+                                <td>{{INMUEBLE}}</td>
+                                <td>{{ARRENDATARIO}}</td>
+                                <td>{{numberFormat INGRESOS}}</td>
+                                <td>{{numberFormat EGRESOS}}</td>
+                                <td>{{numberFormat SALDO_A_LIQUIDAR}}</td>
+                            </tr>
+                        {{else}}
+                            <tr>                                        
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        {{/each}}
+
+                    </tbody>
+                </table>        
+            </div>
+        </div>        
+        <br>
+        <div class="card">
+            <div class="container">
+                <h4><b>II.- Gastos generales </b></h4>
+
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Item</th>
+                            <th scope="col">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each gb}}
+
+                            {{#if (ne id_mov 6) }}
+                                {{#if (ne id_mov 17) }}
+                                    <tr>
+                                        <td>{{FECHA}}</td>
+                                        <td>{{MOV}}</td>
+                                        <td>{{numberFormat MONTO }}</td>
+                                    </tr>
+                                {{/if}}
+                            {{/if}}
+                        {{else}}
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>        
+            </div>
+        </div>
+            <br>
+        <div class="card">
+            <div class="container">
+                <h4>
+                    <b>III.- Totales </b>
+                </h4>        
+                <table class="table table-sm">
+                    <tbody>
+                        <tr>
+                            <td>Comisión Administración</td>
+                        {{#each totalLiquidacionComision}}
+
+                            {{#if (eq id_mov 6) }} 
+                                    <td>{{numberFormat MONTO}}</td>
+                                </tr>
+                            {{/if}}
+                            
+                        {{else}}
+
+                                <td></td>
+                            </tr>
+                                
+                        {{/each}}   
+
+                            <tr>
+                                <td><b>Total Liquidación</b></td>
+                        {{#each totalLiquidacionComision}}
+
+                            {{#if (eq id_mov 17) }}
+                                    
+                                        <td><b>{{numberFormat MONTO}}</b></td>
+                                    </tr>     
+                            {{/if}}
+                        {{else}}
+
+                                <td></td>
+                            </tr>   
+                        {{/each}}  
+                    </tbody>
+                </table>        
+            </div>
+        </div>
+            <br>        
+        <div class="card">
+            <div class="container">
+                <h4><b>IV.- Detalle movimientos propiedades </b></h4>
+
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Propiedad</th>
+                            <th scope="col">Descripción</th>
+                            <th scope="col">Cargo</th>
+                            <th scope="col">Abono</th>
+                            <th scope="col">Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each det}}                         
+                            
+                            <tr>
+                                <th scope="row">{{ID}}</th>
+                                <td>{{FECHA}}</td>
+                                <td>{{PROPIEDAD}}</td>
+                                <td>{{DESCRIPCION}}</td>
+                                <td>{{numberFormat CARGO}}</td>
+                                <td>{{numberFormat ABONO}}</td>
+                                <td>{{numberFormat TOTALDETALLE }}</td>
+                            </tr>
+                        {{else}}
+                            <tr>
+                                <th scope="row"></th>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+
+                </table>        
+            </div>
+        </div>
+            <br>
+        </div>
+    </body>
+</html>

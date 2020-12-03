@@ -14,8 +14,23 @@ const amh = require('../controllers/amhController');
  */
 
 
+ /**
+  * CREA ARCHIVO PDF - MOVIMIENTOS DE CAJA  
+  */
+async function createPDFMovimientoCaja() {
+    try {
+        
+    } catch (error) {
+        
+        return {
+            status : false,
+            message : error.message
+        }
+    }
+    
+}
 
- 
+
 
 /***###################################################################
  *      LIQUIDACION
@@ -110,7 +125,11 @@ async function createPDF(numCuenta, xPeriodo , xnombreUsuario) {
         let data = await getData(numCuenta, xPeriodo);        
         //let pathRed = '\\\\mqvsfs01\\MQSIS\\SISX\\';
         let nameFilePdf = `liq_${numCuenta}_${moment().format('YYYYMMDD_HHmmss')}.pdf`;
+
+        //Guarda información del archivo a crear...
         let result = await liquidacion.guardaInfoPdfCreado(xnombreUsuario,numCuenta,xPeriodo,nameFilePdf);
+
+        //Informacion del propiedatario
         let rNombrePropietaro = await liquidacion.getInfoPropietario(numCuenta);
         if(result.status)
         {            
@@ -179,4 +198,7 @@ async function createPDF(numCuenta, xPeriodo , xnombreUsuario) {
     }
 }
 
-module.exports = { createPDF };
+module.exports = { 
+    createPDF,
+    createPDFMovimientoCaja 
+};
