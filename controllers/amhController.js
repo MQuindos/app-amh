@@ -44,7 +44,7 @@ async function getMovCajaEnt_PorFecha(xfecha )
 {
     try 
     {
-        if(xfecha !== '') 
+        if(trim(xfecha) !== '') 
         {        
             let rs = await pool1.connect(); // Obtenemos la conexion
             //[sp_movcajaent_now_LeerXFecha]
@@ -53,7 +53,7 @@ async function getMovCajaEnt_PorFecha(xfecha )
                         ,cod_tipdocto,cod_tipcta,cod_tipmovto,glosa,monto,fecha,hora
                         ,persona,nulo,genera,estado,fecha_liq,liq_temp,liq_acum,sel_movarr,comi_cobrada
                     FROM movcajaent_now
-                    WHERE fecha = CONVERT(DATETIME,` + xfecha + `)
+                    WHERE fecha = CONVERT(DATETIME,'` + xfecha + `')
                     ORDER BY idmovcajdia
                 `;
 

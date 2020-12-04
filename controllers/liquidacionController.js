@@ -493,7 +493,7 @@ async function infoOrdenAdministracion(xNumCuenta)
                     from OrdenAdministracion oa
                     left join Detalle_OrdenAdminCtacte_NEW doac on oa.cod_contratoadm = doac.NOrden
                     where /*cod_propietario = '992890009123' */
-                        NCtaCte = ` + xNumCuenta + ` and nulo = 'NO'
+                        NCtaCte =  ${xNumCuenta} and nulo = 'NO'
 
                     UNION ALL
 
@@ -501,7 +501,7 @@ async function infoOrdenAdministracion(xNumCuenta)
                     from OrdenAdministracionAnexo oaa
                     left join Detalle_AnexoOrdAdm_CtaCte daod on oaa.id_anexo_contadm = daod.Id_AnexoOrdAdm
                     where /*cod_propietario = '992890009123' */
-                        NCtaCte = ` + xNumCuenta + ` and nulo = 'NO'
+                        NCtaCte = ${xNumCuenta} and nulo = 'NO'
                 ) ordenadmin
                 order by fecha_contrato desc
 

@@ -17,8 +17,71 @@ const amh = require('../controllers/amhController');
  /**
   * CREA ARCHIVO PDF - MOVIMIENTOS DE CAJA  
   */
-async function createPDFMovimientoCaja() {
+async function createPDFMovimientoCaja(xArr) {
     try {
+
+        //let nameFilePdf = `movimiento_caja_${moment().format('YYYYMMDD_HHmmss')}.pdf`;
+        let namesPdf = [];
+
+        //recorremos xArr
+        for (let i = 0; i < xArr.length; i++) {
+            //Recuperamos la fecha
+            let fecha = xArr[i].toString();
+
+            //Creamos y guardamos el nombre del archivo
+            let nameFilePdf = `mov_caja_${fecha.replace('-','')}.pdf`;
+            namesPdf.push({namesPdf});
+
+            //Creamos path Folder file pdf
+            let folderFilePdf = '/public/download/';
+            let pathPdf = path.join(process.cwd(),folderFilePdf,nameFilePdf);
+
+            //Buscamos la data a procesar
+            let resp = await amh.getMovCajaEnt_PorFecha(fecha);
+
+            //Preparamos herramienta para crear arcjhivo...
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+
+            //Preparar data para generar pdf
+
+
+            //Creamos el archivo pdf con la informacion recopilada
+            const content = await compile('formatAmhMovimientosCaja',ress);
+            await page.setContent(content);
+
+            await page.pdf({
+                path: pathPdf,
+                format: '',
+                printBackground: true,
+                displayHeaderFooter: true,
+                headerTemplate: `<div style="font-size:7px;white-space:nowrap;margin-left:38px;">                                
+                                    <span style="margin-left: 10px;"></span>
+                                </div>`,
+                footerTemplate: `<div style="font-size:7px;white-space:nowrap;margin-left:38px;width:100%;text-align:center;">
+                                Por Montalva Quindos - www.mq.cl - info@mq.cl
+                                <span style="display:inline-block;float:right;margin-right:10px;">
+                                    <span class="pageNumber"></span> / <span class="totalPages"></span>
+                                </span>
+                            </div>`,
+                margin: {
+                    top: '10px',
+                    right: '18px',
+                    bottom: '38px',
+                    left: '10px'
+                }
+            });
+
+            await browser.close();
+
+        }       
+
+
+        return {
+            status : true,
+            pathfile : namesPdf
+        }
+
         
     } catch (error) {
         
@@ -159,7 +222,7 @@ async function createPDF(numCuenta, xPeriodo , xnombreUsuario) {
                                     <span style="margin-left: 10px;"></span>
                                 </div>`,
                 footerTemplate: `<div style="font-size:7px;white-space:nowrap;margin-left:38px;width:100%;text-align:center;">
-                                Por Montalva Quindos - www.mq.cl
+                                Por Montalva Quindos - www.mq.cl - info@mq.cl
                                 <span style="display:inline-block;float:right;margin-right:10px;">
                                     <span class="pageNumber"></span> / <span class="totalPages"></span>
                                 </span>
