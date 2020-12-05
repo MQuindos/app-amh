@@ -23,6 +23,8 @@ async function createPDFMovimientoCaja(xArr) {
         //let nameFilePdf = `movimiento_caja_${moment().format('YYYYMMDD_HHmmss')}.pdf`;
         let namesPdf = [];
 
+        let folderFilePdf = '/public/download/';
+
         //recorremos xArr
         for (let i = 0; i < xArr.length; i++) {
             //Recuperamos la fecha
@@ -32,8 +34,7 @@ async function createPDFMovimientoCaja(xArr) {
             let nameFilePdf = `mov_caja_${fecha.replace('-','')}.pdf`;
             namesPdf.push({namesPdf});
 
-            //Creamos path Folder file pdf
-            let folderFilePdf = '/public/download/';
+            //Creamos path Folder save file pdf            
             let pathPdf = path.join(process.cwd(),folderFilePdf,nameFilePdf);
 
             //Buscamos la data a procesar
@@ -45,9 +46,12 @@ async function createPDFMovimientoCaja(xArr) {
 
             //Preparar data para generar pdf
 
+            let dataFile = {
+                fc : fecha
+            }
 
             //Creamos el archivo pdf con la informacion recopilada
-            const content = await compile('formatAmhMovimientosCaja',ress);
+            const content = await compile('formatAmhMovimientosCaja',dataFile);
             await page.setContent(content);
 
             await page.pdf({

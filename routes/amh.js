@@ -7,6 +7,7 @@ const moment = require('moment');
 const nodeoutlook = require('nodemailer');
 
 const amhController = require('../controllers/amhController');
+const pdfCrea = require('../pdfcreate/pdf');
 
 const path = require('path');
 const multer = require('multer');
@@ -596,8 +597,6 @@ router.get('/amh/home', async(req, res) => {
 
 });
 
-
-
 router.get('/amh/deleteDataAMH', async(req, res) => {
 
     try {
@@ -660,5 +659,43 @@ var upload = multer({
         }
         /*dest: __dirname + '/public/upload/'*/
 });
+
+
+router.get('/amh/getMovimientoCaja', async(req,res) => {
+
+    try {
+
+        console.log('query::',req.query);
+        console.log('Body::',req.body);
+        console.log('Req',req);
+
+        let arrFC = req.body.fc;
+
+        const resp = pdfCrea.createPDFMovimientoCaja(arrFC);
+        if(resp.status)
+        {
+            return {
+                status : true,
+                message : 'Archivo creado...'
+            }
+        }
+        else
+        {
+            return {
+                status : false,
+                message : resp.message
+            }
+        }        
+
+    } catch (error) {
+
+        return {
+            status : false,
+            message : error.message
+        }
+        
+    }
+});
+
 
 module.exports = router;

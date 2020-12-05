@@ -88,6 +88,8 @@
         <div class="col-4">
             <button type="button" title="PROCESAR REGISTROS PENDIENTES" id="btnProcesar" class="btn btn-success btn-sm">PROCESAR</button>
             <button type="button" title="ELIMINAR REGISTROS PENDIENTES" id="btnEliminar" class="btn btn-danger btn-sm">LIMPIAR</button>
+            <button type="button" title="CREA" id="btnCrea" class="btn btn-danger btn-sm">CREAR</button>
+
         </div>    
     </div>
 
@@ -343,6 +345,27 @@
                 }            
             });
         }    
+    });
+
+
+        
+    document.getElementById('btnCrea').addEventListener('click', function () {
+
+        
+        
+        $.ajax({
+                method: 'GET',
+                url: '/amh/getMovimientoCaja',
+                data: {'27-11-2020','26-11-2020'},
+                success: function (resp) {
+                    if(resp.status)
+                    {
+                        console.log(resp);
+                    }
+                    
+                }
+        });
+
     });
 
     
