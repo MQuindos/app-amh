@@ -17,74 +17,93 @@ const amh = require('../controllers/amhController');
  /**
   * CREA ARCHIVO PDF - MOVIMIENTOS DE CAJA  
   */
-async function createPDFMovimientoCaja(xArr) {
-    try {
-
-        //let nameFilePdf = `movimiento_caja_${moment().format('YYYYMMDD_HHmmss')}.pdf`;
-        let namesPdf = [];
-
-        let folderFilePdf = '/public/download/';
-
-        //recorremos xArr
-        for (let i = 0; i < xArr.length; i++) {
-            //Recuperamos la fecha
-            let fecha = xArr[i].toString();
-
-            //Creamos y guardamos el nombre del archivo
-            let nameFilePdf = `mov_caja_${fecha.replace('-','')}.pdf`;
-            namesPdf.push({namesPdf});
-
-            //Creamos path Folder save file pdf            
-            let pathPdf = path.join(process.cwd(),folderFilePdf,nameFilePdf);
-
-            //Buscamos la data a procesar
-            let resp = await amh.getMovCajaEnt_PorFecha(fecha);
-
-            //Preparamos herramienta para crear arcjhivo...
-            const browser = await puppeteer.launch();
-            const page = await browser.newPage();
-
-            //Preparar data para generar pdf
-
-            let dataFile = {
-                fc : fecha
+async function createPDFMovimientoCaja(req) {
+    try {            
+            let namesPdf = [];
+            let folderFilePdf = '/public/download/';
+            let fc = req.query;
+            let arGet;
+            for(let ar in fc)
+            {            
+                arGet = ar;
             }
+    
+            //VERIFICAMOS QUE TENGA DATA
+            if(arGet.length) {
+                let arr = arGet.split(',');
+    
+                for(let d in arr)
+                {   
 
-            //Creamos el archivo pdf con la informacion recopilada
-            const content = await compile('formatAmhMovimientosCaja',dataFile);
-            await page.setContent(content);
+                    //Recuperamos la fecha
+                    let fecha = arr[d].replace('"', '').replace('"', '').toString();
+                    let fcTitulo = fecha;
+                    let fcAdaptado = fecha.split('-');
+                    fecha = fcAdaptado[2].toString() + '-' + fcAdaptado[1].toString() + '-' + fcAdaptado[0].toString();
 
-            await page.pdf({
-                path: pathPdf,
-                format: '',
-                printBackground: true,
-                displayHeaderFooter: true,
-                headerTemplate: `<div style="font-size:7px;white-space:nowrap;margin-left:38px;">                                
-                                    <span style="margin-left: 10px;"></span>
-                                </div>`,
-                footerTemplate: `<div style="font-size:7px;white-space:nowrap;margin-left:38px;width:100%;text-align:center;">
-                                Por Montalva Quindos - www.mq.cl - info@mq.cl
-                                <span style="display:inline-block;float:right;margin-right:10px;">
-                                    <span class="pageNumber"></span> / <span class="totalPages"></span>
-                                </span>
-                            </div>`,
-                margin: {
-                    top: '10px',
-                    right: '18px',
-                    bottom: '38px',
-                    left: '10px'
+                    //Creamos y guardamos el nombre del archivo
+                    let nameFilePdf = `mov_caja_${fecha.replace('-','_').replace('-','_')}.pdf`;
+                    namesPdf.push({namesPdf});
+
+                    //Creamos path save file pdf            
+                    let pathPdf = path.join(process.cwd(),folderFilePdf,nameFilePdf);
+
+                    //Buscamos la data a procesar
+                    let resp = await amh.getMovCajaEnt_PorFecha(fecha);
+                    
+                    //Preparamos herramienta para crear archivo...
+                    const browser = await puppeteer.launch();
+                    const page = await browser.newPage();
+
+                    //Preparar data para generar pdf
+                    let dataFile = {
+                        fc : fcTitulo,
+                        data : resp.data
+                    }
+                    
+                    //Creamos el archivo pdf con la informacion recopilada
+                    const content = await compile('formatAmhMovimientosCaja',dataFile);
+                    await page.setContent(content);
+
+                    await page.pdf({
+                        path: pathPdf,
+                        format: '',
+                        printBackground: true,
+                        displayHeaderFooter: true,
+                        headerTemplate: `<div style="font-size:7px;white-space:nowrap;margin-left:38px;">                                
+                                            <span style="margin-left: 10px;"></span>
+                                        </div>`,
+                        footerTemplate: `<div style="font-size:7px;white-space:nowrap;margin-left:38px;width:100%;text-align:center;">
+                                        Por Montalva Quindos - Huérfanos 669 Oficina 605 - Santiago, Chile <br> Fono (56-2) 345 41 00 - Fax (56-2) 345 41 48 - www.mq.cl - info@mq.cl
+                                        <span style="display:inline-block;float:right;margin-right:10px;">
+                                            <span class="pageNumber"></span> / <span class="totalPages"></span>
+                                        </span>
+                                    </div>`,
+                        margin: {
+                            top: '10px',
+                            right: '18px',
+                            bottom: '40px',
+                            left: '10px'
+                        }
+                    });
+
+                    await browser.close();
+
+                } /* FIN for(let d in arr) */
+                
+                return {
+                    status : true,
+                    pathfile : namesPdf
                 }
-            });
 
-            await browser.close();
-
-        }       
-
-
-        return {
-            status : true,
-            pathfile : namesPdf
-        }
+            }
+            else
+            {
+                return {
+                    status : false,
+                    message : 'Sin parametros'
+                }
+            }   
 
         
     } catch (error) {

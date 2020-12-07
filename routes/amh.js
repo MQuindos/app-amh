@@ -663,38 +663,9 @@ var upload = multer({
 
 router.get('/amh/getMovimientoCaja', async(req,res) => {
 
-    try {
+    pdfCrea.createPDFMovimientoCaja(req);
 
-        console.log('query::',req.query);
-        console.log('Body::',req.body);
-        console.log('Req',req);
-
-        let arrFC = req.body.fc;
-
-        const resp = pdfCrea.createPDFMovimientoCaja(arrFC);
-        if(resp.status)
-        {
-            return {
-                status : true,
-                message : 'Archivo creado...'
-            }
-        }
-        else
-        {
-            return {
-                status : false,
-                message : resp.message
-            }
-        }        
-
-    } catch (error) {
-
-        return {
-            status : false,
-            message : error.message
-        }
-        
-    }
+    
 });
 
 

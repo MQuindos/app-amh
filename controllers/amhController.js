@@ -40,22 +40,27 @@ async function getPathComprobantePago_Amh() {
  * Retorna información de los movimientos de entrada a la caja, de acuerdo a la fecha enviada.
  * @param {Fecha de los movimientos formato(dd-mm-aaaa)} xfecha 
  */
-async function getMovCajaEnt_PorFecha(xfecha )
+async function getMovCajaEnt_PorFecha(xfecha)
 {
     try 
     {
-        if(trim(xfecha) !== '') 
+        if(xfecha.trim() !== '') 
         {        
             let rs = await pool1.connect(); // Obtenemos la conexion
             //[sp_movcajaent_now_LeerXFecha]
             let qy = `
                     SELECT idmovcaj,idmovcajdia,idcomprobante,codigo,cod_propiedad,cod_arrendatario
                         ,cod_tipdocto,cod_tipcta,cod_tipmovto,glosa,monto,fecha,hora
-                        ,persona,nulo,genera,estado,fecha_liq,liq_temp,liq_acum,sel_movarr,comi_cobrada
+                        ,persona,nulo,genera
+                        ,case when genera = 'entrada' then monto else 0 end as entrada
+	                    ,case when genera = 'salida' then monto else 0 end as salida
+                        ,estado,fecha_liq,liq_temp,liq_acum,sel_movarr,comi_cobrada
                     FROM movcajaent_now
-                    WHERE fecha = CONVERT(DATETIME,'` + xfecha + `')
-                    ORDER BY idmovcajdia
+                    WHERE fecha = '${xfecha}'
+                    ORDER BY idmovcajdia;
                 `;
+                //'${xfecha.replace('-','/').replace('-','/').replace('-','/')}
+                // console.log(qy);
 
             let data = await pool1.query(qy);
 
@@ -67,6 +72,7 @@ async function getMovCajaEnt_PorFecha(xfecha )
         } 
         else 
         {
+
             return {
                 status: false,
                 message:'Parámetro vacío'
@@ -74,7 +80,7 @@ async function getMovCajaEnt_PorFecha(xfecha )
         }
 
     } catch (error) {
-
+console.log('Problemas::',error.message);
         return {
             status: false,
             message:error.message

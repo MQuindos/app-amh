@@ -351,12 +351,15 @@
         
     document.getElementById('btnCrea').addEventListener('click', function () {
 
-        
-        
+        console.log('Click bnCrea');
+        var arr = ['27-11-2020','26-11-2020'];
+        //var valParam = JSON.stringify(arr);
+
         $.ajax({
                 method: 'GET',
                 url: '/amh/getMovimientoCaja',
-                data: {'27-11-2020','26-11-2020'},
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(arr),
                 success: function (resp) {
                     if(resp.status)
                     {
