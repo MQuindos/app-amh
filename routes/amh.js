@@ -32,7 +32,7 @@ var ssn;
 router.post('/amh/fileprocesa', (req, res) => {
 
     let arrResponse;
-    let dataInsert = [];
+    let dataHeader = [];
     let dataRetorno_problemas = [];
     let dataRetorno_procesado = [];
 
@@ -52,19 +52,44 @@ router.post('/amh/fileprocesa', (req, res) => {
             var filePath = req.file.path;
             var fileName = req.file.originalname;
             var fileExtens = path.extname(req.file.originalname);
-            //console.log('filePath::', filePath, 'fileName::', fileName, ' fileExtens::', fileExtens, ' fileField::', fileField);
-            //filePath:: C:\Users\mtoro\work\app-cargaprocesa-amh\routes\public\upload\file_11-5-2020_14728_Cambio_GGCC_Lizzette.xlsx
 
             //Leemos el archivo
             var workbook = XLSX.readFile(filePath);
             var sheet_name_list = workbook.SheetNames;
             var xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
 
+            dataHeader.push({
+                                1 : workbook.Sheets[sheet_name_list[0]]['A1']['v'],
+                                2 : workbook.Sheets[sheet_name_list[0]]['B1']['v'],
+                                3 : workbook.Sheets[sheet_name_list[0]]['C1']['v'],
+                                4 : workbook.Sheets[sheet_name_list[0]]['D1']['v'],
+                                5 : workbook.Sheets[sheet_name_list[0]]['E1']['v'],
+                                6 : workbook.Sheets[sheet_name_list[0]]['F1']['v'],
+                                7 : workbook.Sheets[sheet_name_list[0]]['G1']['v'],
+                                8 : workbook.Sheets[sheet_name_list[0]]['H1']['v'],
+                                9 : workbook.Sheets[sheet_name_list[0]]['I1']['v'],
+                                10 : workbook.Sheets[sheet_name_list[0]]['J1']['v'],
+                                11 : workbook.Sheets[sheet_name_list[0]]['K1']['v'],
+                                12 : workbook.Sheets[sheet_name_list[0]]['L1']['v'],
+                                13 : workbook.Sheets[sheet_name_list[0]]['M1']['v'],
+                                14 : workbook.Sheets[sheet_name_list[0]]['N1']['v']
+                            });
+
             try {
 
-                if (!xlData[0].hasOwnProperty('MONTO_PAGADO') ||
-                    !xlData[0].hasOwnProperty('NUMERO_OPERACION') ||
-                    !xlData[0].hasOwnProperty('FECHA_PAGO')) throw new Error('Error en el archivo, algunos nombres de las columnas no tienen un NOMBRE válido!!');
+                /*VALIDAMOS QUE ARCHIVO TENGA LAS SIGUIENTES COLUMNAS... */
+                let columnValida = 0;
+                for(let val in dataHeader[0]) {
+                    if(dataHeader[0][val] === 'MONTO_PAGADO' ||
+                        dataHeader[0][val] === 'NUMERO_OPERACION' ||
+                        dataHeader[0][val] === 'FECHA_PAGO'
+                    ) {
+                        columnValida++;
+                    }
+                }
+
+                if(columnValida !== 3) throw new Error('Error en el archivo, algunos nombres de las columnas no tienen un NOMBRE válido!!')
+
 
             } catch (e) {
 
@@ -83,9 +108,8 @@ router.post('/amh/fileprocesa', (req, res) => {
 
                 for (let row in dataProcess) {
 
-  //                  console.log('dataProcess[row].VALIDO:',dataProcess[row].VALIDO);
                     if (dataProcess[row].VALIDO) {
-//console.log('Antes de sava data excel... then()');
+                        //console.log('Antes de sava data excel... then()');
                         await saveDataExcel(dataProcess[row]).then((res) => {
 
                             if (!res.status) {
@@ -398,10 +422,12 @@ async function executeExe(dataProcess) {
                             //ENVIAMOS MAIL TRAS FINALIZAR EJECUCION
                             prepareMail(); 
                         }                        
-                    }                    
+                    } 
 
-                });                
+                });
 
+                console.log('Estamos ejecutando : ',i);
+                
             }, 8000 * i);
 
         }
@@ -435,7 +461,7 @@ async function prepareMail() {
             data.push({'filename': name, 'path':item.pathf});            
         }
 
-        sendMail(data);
+        await sendMail(data);
         
         return {
             status:true,
@@ -565,7 +591,7 @@ async function dataToEXE() {
             ', archi_monto_pago as monto /*,cast(case when lower(archi_moneda) = \'pesos\' then archi_monto_pago else archi_monto_pago * UF.valor_uf end as decimal(18,2)) as monto*/ ' +
             ' from amh_data_retorno ADR ' +
             '     /*inner join historico_uf UF on convert(date,ADR.archi_fecha_pago) = convert(date,UF.fecha) */ ' +
-            ' where proces_estado = 1 ';
+            ' where proces_estado = 1 AND archi_monto_pago > 0 ';
         let dataaprocesar = await pool1.query(qyProcesar);
 
         return {

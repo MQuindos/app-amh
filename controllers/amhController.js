@@ -52,8 +52,8 @@ async function getMovCajaEnt_PorFecha(xfecha)
                     SELECT idmovcaj,idmovcajdia,idcomprobante,codigo,cod_propiedad,cod_arrendatario
                         ,cod_tipdocto,cod_tipcta,cod_tipmovto,glosa,monto,fecha,hora
                         ,persona,nulo,genera
-                        ,case when genera = 'entrada' then monto else 0 end as entrada
-	                    ,case when genera = 'salida' then monto else 0 end as salida
+                        ,case when genera = 'entrada' then isnull(monto,0) else 0 end as entrada
+	                    ,case when genera = 'salida' then isnull(monto,0) else 0 end as salida
                         ,estado,fecha_liq,liq_temp,liq_acum,sel_movarr,comi_cobrada
                     FROM movcajaent_now
                     WHERE fecha = '${xfecha}'
@@ -80,11 +80,13 @@ async function getMovCajaEnt_PorFecha(xfecha)
         }
 
     } catch (error) {
+
 console.log('Problemas::',error.message);
         return {
             status: false,
             message:error.message
         }
+        
     }
 }
 
