@@ -75,30 +75,21 @@ router.post('/amh/fileprocesa', (req, res) => {
                                 14 : workbook.Sheets[sheet_name_list[0]]['N1']['v']
                             });
 
-            try {
 
-                /*VALIDAMOS QUE ARCHIVO TENGA LAS SIGUIENTES COLUMNAS... */
-                let columnValida = 0;
-                for(let val in dataHeader[0]) {
-                    if(dataHeader[0][val] === 'MONTO_PAGADO' ||
-                        dataHeader[0][val] === 'NUMERO_OPERACION' ||
-                        dataHeader[0][val] === 'FECHA_PAGO'
-                    ) {
-                        columnValida++;
-                    }
+
+            /*VALIDAMOS QUE ARCHIVO TENGA LAS SIGUIENTES COLUMNAS... */
+            let columnValida = 0;
+            for(let val in dataHeader[0]) {
+                if(dataHeader[0][val] === 'MONTO_PAGADO' ||
+                    dataHeader[0][val] === 'NUMERO_OPERACION' ||
+                    dataHeader[0][val] === 'FECHA_PAGO'
+                ) {
+                    columnValida++;
                 }
-
-                if(columnValida !== 3) throw new Error('Error en el archivo, algunos nombres de las columnas no tienen un NOMBRE válido!!')
-
-
-            } catch (e) {
-
-                return res.json({
-                    'status': false,
-                    'message': e.message
-                });
-
             }
+
+            if(columnValida !== 3) throw new Error('Error en el archivo, algunos nombres de las columnas no tienen un NOMBRE válido!!');
+
 
             //Obtenemos la data del archivo
             let resulValid = await validaDataExcel(xlData);
@@ -170,25 +161,23 @@ async function validaDataExcel(xdata) {
 
     try {
 
-        //OBTENEMOS LA FECHA DE PAGO, ULTIMO PROCESADO
+        //OBTENEMOS LA FECHA DE PAGO, DEL ÚLTIMO PROCESADO
         let qy = 'Select top 1 case when concat(convert(varchar(10), max(archi_fecha_pago),105),\' \' ' +
             ' ,convert(varchar(10), max(archi_fecha_pago),108)) = \'\' ' +
             ' then concat(convert(varchar(10), getdate() - 590, 105), \' \', convert(varchar(10), getdate() - 590, 108)) ' +
             ' else concat(convert(varchar(10), max(archi_fecha_pago), 105), \' \', convert(varchar(10), max(archi_fecha_pago), 108)) end as fechapago_max ' +
             ' from amh_data_retorno ' +
-            ' where proces_estado in(1,2); ';
+            ' where proces_estado in(2); ';
 
         let rs = await pool1.connect(); // Obtenemos la conexion
         let rsQy = await pool1.query(qy); //Ejecutamos la insercion data excel
 
-        //let fcTestBBDD = new Date(rsQy.recordset[0].fechapago_max); // La fecha viene en texto
+        /** OBTENEMOS LA ULTIMA FECHA DE PAGO PROCESADA Y VERIFICAMOS QUE LA FECHA DE LA ACTUAL CARGA SEA SUPERIOR */
         let fcTestBBDD = rsQy.recordset[0].fechapago_max; // La fecha viene en texto
         let fc_ultimoBBDD = new Date(moment(fcTestBBDD, 'DD/MM/YYYY HH:mm:ss').format("YYYY-MM-DD HH:mm:ss"));
         // let fc_ultimoBBDD = fcTest.getFullYear() + '-' + fcTest.getDate() + '-' + (fcTest.getMonth() + 1) + ' ' + fcTest.getHours() + ':' + fcTest.getMinutes() + ':' + fcTest.getSeconds();
         let dataReturn = [];
         let statusRow = false;
-
-        //console.log('ultimo BBDD::',fc_ultimoBBDD, ' fechapago::', xdata[0].FECHA_PAGO );
 
         for (let row in xdata) {
 
@@ -405,14 +394,17 @@ async function executeExe(dataProcess) {
 
             i++;
             await setTimeout(function() {
-                // console.log('executeExe ejecutando::',item);
+
                 let directorioEXE = path.join(__dirname, '../exe/Exe/procesarpago4.exe');
-                let cmd = `start ${directorioEXE} ${item.id},${item.fc_pago},${item.fc_pago} `;
+                // console.log(directorioEXE);
+
+                //let cmd = `start "${directorioEXE}" ${item.id},${item.fc_pago},${item.fc_pago} `;
+                let cmd = path.join(__dirname,'../exe/Exe/procesarpago4.exe') + ' ' + item.id + ',' + item.fc_pago + ',' + item.fc_pago + ' ';
 
                 childProcess.exec(cmd, function(error, stdout, stderr) {                    
                     if (error != null) {
 
-                        console.log('error occurred: ' + error);
+                        console.log('Occurred: ' + error);
                         x++;
 
                     } else {
@@ -424,9 +416,11 @@ async function executeExe(dataProcess) {
                         }                        
                     } 
 
+                    console.log('Pasamsonp : ',x);
+
                 });
 
-                console.log('Estamos ejecutando : ',i);
+                console.log('Estamos ejecutando : ',x);
                 
             }, 8000 * i);
 
@@ -519,6 +513,132 @@ async function sendMail(attach) {
 }
 
 
+async function dataToEXE() {
+
+    try {
+        let rsDetalleUPDATE = await pool1.connect(); // Obtenemos la conexion
+        let qyProcesar = '  Select proces_id id ' +
+            ' ,archi_moneda moneda ' +
+            ' ,replace(convert(varchar(10),archi_fecha_pago,105),\'-\',\'/\') fc_pago ' +
+            ', archi_monto_pago as monto /*,cast(case when lower(archi_moneda) = \'pesos\' then archi_monto_pago else archi_monto_pago * UF.valor_uf end as decimal(18,2)) as monto*/ ' +
+            ' from amh_data_retorno ADR ' +
+            '     /*inner join historico_uf UF on convert(date,ADR.archi_fecha_pago) = convert(date,UF.fecha) */ ' +
+            ' where proces_estado = 1 AND archi_monto_pago > 0 ';
+        let dataaprocesar = await pool1.query(qyProcesar);
+
+        return {
+            status: true,
+            message: 'PROCESO CORRECTO',
+            data: dataaprocesar.recordset
+        }
+
+    } catch (error) {
+        return {
+            status: false,
+            message: error.message
+        }
+    }
+}
+
+router.get('/amh/home', async(req, res) => {
+    ssn = req.session;
+    const data = await amhController.getDataVista();    
+    let linksProcess = data.linksProcess;
+    let linksReturn = data.linksReturn;
+
+    res.render('amh/list', {
+        links: linksReturn,
+        dataProcesados: linksProcess,
+        name_user: ssn.nombre,
+        nombrelog: 'ssd'
+    });
+
+});
+
+router.get('/amh/deleteDataAMH', async(req, res) => {
+
+    try {
+
+        let rsConn = await pool1.connect(); // Obtenemos la conexion
+        let qyDetallePago = ` 
+            UPDATE amh_detallepago_ccierta_dataretorno SET ret_proces_estado = 3, 
+                ret_fecha_procesado = getdate(), ret_proces_obs = 'Eliminado por Usuario'                    
+            where ret_proces_id in( 
+                Select proces_id from amh_data_retorno where proces_estado = 1 
+            )
+            and ret_proces_estado = 1;`
+        let resUpdate = await pool1.query(qyDetallePago);
+
+        let rs = await pool1.connect(); // Obtenemos la conexion
+        let qy = `
+            UPDATE amh_data_retorno SET proces_estado = 3,
+                proces_fecha_procesado = getdate(), proces_obs = 'Eliminado por Usuario' 
+            WHERE proces_estado = 1 `;
+        let resulRetorno = await pool1.query(qy);
+
+        res.json({
+            status: true,
+            message: 'Registros eliminados'
+        });
+
+    } catch (error) {
+        // console.log('Error elim::',error.message);
+        res.json({
+            status: false,
+            message: error.message
+        });
+
+    }
+
+});
+
+var storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, path.join(__dirname, '../public/upload/'))
+    },
+    filename: function(req, file, cb) {
+
+        let today = new Date();
+        let dd = today.getDate();
+        let mm = today.getMonth() + 1;
+        let yyyy = today.getFullYear();
+        let h = today.getHours();
+        let m = today.getMinutes();
+        let s = today.getSeconds();
+        let nameFile = 'file_' + dd + '-' + mm + '-' + yyyy + '_' + h + '' + m + '' + s + '_' + file.originalname;
+        nameFile = nameFile.replace(/\s/g, "_");
+
+        cb(null, nameFile);
+
+    }
+});
+
+var upload = multer({
+    storage: storage,
+    fileFilter: function(req, file, callback) { //file filter
+            if (['xls', 'xlsx'].indexOf(file.originalname.split('.')[file.originalname.split('.').length - 1]) === -1) {
+
+                return callback(new Error('Tipo archivo no permitido'));
+            }
+
+            callback(null, true);
+        }
+        /*dest: __dirname + '/public/upload/'*/
+});
+
+
+/*TEST CARTOLA CAJA */
+router.get('/amh/getMovimientoCaja', async(req,res) => {
+
+    pdfCrea.createPDFMovimientoCaja(req);
+
+    
+});
+
+
+module.exports = router;
+
+
 
 // function executeEXE() {
 
@@ -580,119 +700,3 @@ async function sendMail(attach) {
 //     });
 
 // }
-
-async function dataToEXE() {
-
-    try {
-        let rsDetalleUPDATE = await pool1.connect(); // Obtenemos la conexion
-        let qyProcesar = '  Select proces_id id ' +
-            ' ,archi_moneda moneda ' +
-            ' ,replace(convert(varchar(10),archi_fecha_pago,105),\'-\',\'/\') fc_pago ' +
-            ', archi_monto_pago as monto /*,cast(case when lower(archi_moneda) = \'pesos\' then archi_monto_pago else archi_monto_pago * UF.valor_uf end as decimal(18,2)) as monto*/ ' +
-            ' from amh_data_retorno ADR ' +
-            '     /*inner join historico_uf UF on convert(date,ADR.archi_fecha_pago) = convert(date,UF.fecha) */ ' +
-            ' where proces_estado = 1 AND archi_monto_pago > 0 ';
-        let dataaprocesar = await pool1.query(qyProcesar);
-
-        return {
-            status: true,
-            message: 'PROCESO CORRECTO',
-            data: dataaprocesar.recordset
-        }
-
-    } catch (error) {
-        return {
-            status: false,
-            message: error.message
-        }
-    }
-}
-
-router.get('/amh/home', async(req, res) => {
-    ssn = req.session;
-    const data = await amhController.getDataVista();    
-    let linksProcess = data.linksProcess;
-    let linksReturn = data.linksReturn;
-
-    res.render('amh/list', {
-        links: linksReturn,
-        dataProcesados: linksProcess,
-        name_user: ssn.nombre,
-        nombrelog: 'ssd'
-    });
-
-});
-
-router.get('/amh/deleteDataAMH', async(req, res) => {
-
-    try {
-
-        let rsConn = await pool1.connect(); // Obtenemos la conexion
-        let qyDetallePago = ' UPDATE amh_detallepago_ccierta_dataretorno SET ret_proces_estado = 3 ' +
-            ' where ret_proces_id in( ' +
-            ' Select proces_id from amh_data_retorno where proces_estado = 1 ) and ret_proces_estado = 1;'
-        let resUpdate = await pool1.query(qyDetallePago);
-
-        let rs = await pool1.connect(); // Obtenemos la conexion
-        let resulRetorno = await pool1.query('UPDATE amh_data_retorno SET proces_estado = 3 where proces_estado = 1 ');
-
-        res.json({
-            status: true,
-            message: 'Registros eliminados'
-        });
-
-    } catch (error) {
-
-        res.json({
-            status: false,
-            message: error.message
-        });
-
-    }
-
-});
-
-var storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, path.join(__dirname, '../public/upload/'))
-    },
-    filename: function(req, file, cb) {
-
-        let today = new Date();
-        let dd = today.getDate();
-        let mm = today.getMonth() + 1;
-        let yyyy = today.getFullYear();
-        let h = today.getHours();
-        let m = today.getMinutes();
-        let s = today.getSeconds();
-        let nameFile = 'file_' + dd + '-' + mm + '-' + yyyy + '_' + h + '' + m + '' + s + '_' + file.originalname;
-        nameFile = nameFile.replace(/\s/g, "_");
-
-        cb(null, nameFile);
-
-    }
-});
-
-var upload = multer({
-    storage: storage,
-    fileFilter: function(req, file, callback) { //file filter
-            if (['xls', 'xlsx'].indexOf(file.originalname.split('.')[file.originalname.split('.').length - 1]) === -1) {
-
-                return callback(new Error('Tipo archivo no permitido'));
-            }
-
-            callback(null, true);
-        }
-        /*dest: __dirname + '/public/upload/'*/
-});
-
-
-router.get('/amh/getMovimientoCaja', async(req,res) => {
-
-    pdfCrea.createPDFMovimientoCaja(req);
-
-    
-});
-
-
-module.exports = router;

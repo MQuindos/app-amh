@@ -129,7 +129,7 @@ async function getResumenCtaCte_x_nCuenta(numCuenta, periodo) {
                     Where /*LTRIM(RTRIM(ISNULL(ARRENDATARIO,''))) != '' */
 					LTRIM(RTRIM(ISNULL(INMUEBLE,''))) != ''
                     order by CASE WHEN INMUEBLE = '' THEN 'OTROS' ELSE INMUEBLE END asc; `;
-            // console.log('QUERY:::', qResumenCtaCte);
+            console.log('QUERY:::', qResumenCtaCte);
 
             let data = await pool1.query(qResumenCtaCte);
 
@@ -327,7 +327,7 @@ async function getDetalleMovimiento(numCuenta, periodo, cod) {
                 ORDER BY concat(PRO.direccion , ' ' , PRO.n_direccion , ' ' , PRO.unidad , ' ' , PRO.n_unidad),fchaFormat asc
             `;
             
-            //console.log('qDetalle::',qDetalle);
+            // console.log('qDetalle::',qDetalle);
 
             let data = await pool1.query(qDetalle);
 
@@ -811,6 +811,5 @@ module.exports = {
     getInfoComision,
     getPropiedadesArrendadasXSanCamilo,
     comisiones_por_ctacte_periodoactual
-
 
 }

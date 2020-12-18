@@ -1,0 +1,36 @@
+[11-12-2020 12:46:09]  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[11-12-2020 12:46:09] Procesando ID :[1] Fecha Proceso :[10-12-2020] Fecha Contable: [10-12-2020]
+[11-12-2020 12:46:09] Servidor de BD : [MQVSDB01] Usuario:[sa]
+[11-12-2020 12:46:11] Ejecutando Subrutina :[sub_ProcesarPagosAMH] ID :[1] Fecha_ActualX:[10-12-2020] FechaContableX:10-12-2020] 
+[11-12-2020 12:46:11] Llegamos a sub_ProcesarPagosAMH
+[11-12-2020 12:46:12] Salida Inesperada por Error...Revisar desde el últimpo mensaje log
+[11-12-2020 12:46:14]  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[11-12-2020 12:46:14] Procesando ID :[2] Fecha Proceso :[08-12-2020] Fecha Contable: [08-12-2020]
+[11-12-2020 12:46:14] Servidor de BD : [MQVSDB01] Usuario:[sa]
+[11-12-2020 12:46:14] Ejecutando Subrutina :[sub_ProcesarPagosAMH] ID :[2] Fecha_ActualX:[08-12-2020] FechaContableX:08-12-2020] 
+[11-12-2020 12:46:14] Llegamos a sub_ProcesarPagosAMH
+[11-12-2020 12:46:15] Salida Inesperada por Error...Revisar desde el últimpo mensaje log
+[11-12-2020 12:46:20]  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[11-12-2020 12:46:20] Procesando ID :[3] Fecha Proceso :[09-12-2020] Fecha Contable: [09-12-2020]
+[11-12-2020 12:46:20] Servidor de BD : [MQVSDB01] Usuario:[sa]
+[11-12-2020 12:46:20] Ejecutando Subrutina :[sub_ProcesarPagosAMH] ID :[3] Fecha_ActualX:[09-12-2020] FechaContableX:09-12-2020] 
+[11-12-2020 12:46:20] Llegamos a sub_ProcesarPagosAMH
+[11-12-2020 12:46:20] Salida Inesperada por Error...Revisar desde el últimpo mensaje log
+[11-12-2020 14:53:07]  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[11-12-2020 14:53:07] Procesando ID :[1] Fecha Proceso :[10-12-2020] Fecha Contable: [10-12-2020]
+[11-12-2020 14:53:07] Servidor de BD : [MQVSDB01] Usuario:[sa]
+[11-12-2020 14:53:08] Ejecutando Subrutina :[sub_ProcesarPagosAMH] ID :[1] Fecha_ActualX:[10-12-2020] FechaContableX:10-12-2020] 
+[11-12-2020 14:53:08] Llegamos a sub_ProcesarPagosAMH
+[11-12-2020 14:53:08] Salida Inesperada por Error...Revisar desde el últimpo mensaje log
+[11-12-2020 14:53:15]  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[11-12-2020 14:53:15] Procesando ID :[2] Fecha Proceso :[08-12-2020] Fecha Contable: [08-12-2020]
+[11-12-2020 14:53:15] Servidor de BD : [MQVSDB01] Usuario:[sa]
+[11-12-2020 14:53:15] Ejecutando Subrutina :[sub_ProcesarPagosAMH] ID :[2] Fecha_ActualX:[08-12-2020] FechaContableX:08-12-2020] 
+[11-12-2020 14:53:15] Llegamos a sub_ProcesarPagosAMH
+[11-12-2020 14:53:15] Salida Inesperada por Error...Revisar desde el últimpo mensaje log
+[11-12-2020 14:53:23]  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[11-12-2020 14:53:23] Procesando ID :[3] Fecha Proceso :[09-12-2020] Fecha Contable: [09-12-2020]
+[11-12-2020 14:53:23] Servidor de BD : [MQVSDB01] Usuario:[sa]
+[11-12-2020 14:53:23] Ejecutando Subrutina :[sub_ProcesarPagosAMH] ID :[3] Fecha_ActualX:[09-12-2020] FechaContableX:09-12-2020] 
+[11-12-2020 14:53:23] Llegamos a sub_ProcesarPagosAMH
+[11-12-2020 14:53:23] Salida Inesperada por Error...Revisar desde el últimpo mensaje log
