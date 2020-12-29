@@ -17,7 +17,7 @@
     
         <div class="row">    
             <div class="col-12 p-3">
-                <h5 class="font-weight-bold titulos text-center"><i> LIQUIDACIONES</i></h5>
+                <h5 class="font-weight-bold titulos text-center"><i> CARTOLA</i></h5>
             </div>
         </div>
 
@@ -106,6 +106,7 @@
                                         <th class="titulos" scope="col">#</th>        
                                         <th class="titulos" scope="col">Fecha</th>
                                         <th class="titulos" scope="col">Item</th>
+                                        
                                         {{!-- <th class="titulos" scope="col">Ingresos</th>
                                         <th class="titulos" scope="col">Egresos</th> --}}
                                         <th class="titulos" scope="col">Saldo</th>                                    
@@ -126,22 +127,28 @@
             </div> 
         </div>
 <hr>
-<hr>
+        <div class="row">
+
+            <div class="col-10 text-secondary" id="txtPorcentAsesoria"> </div>
+            <div class="col-2" id="val_asesoria"></div>
+
+        </div>
+
         <div class="row">
             
-                <div class="col-10 text-secondary" id="txtPorcentComision"> </div>
-                <div class="col-2" id="val_comis"></div>
+            <div class="col-10 text-secondary" id="txtPorcentComision"> </div>
+            <div class="col-2" id="val_comis"></div>
             
         </div>
         <hr>
         <div class="row">            
-                <div class="col-10"><b> Total Liquidación</b></div>
+                <div class="col-10"><b> Total Cartola</b></div>
                 <div class="col-2" id="val_liq"></div>            
         </div>
         <hr>
         <div class="row">    
             <div class="col-4 p-3">                
-                <button id="btnGeneraLiq" class="btn btn-success" hidden="true">Generar liquidación</button>
+                <button id="btnGeneraLiq" class="btn btn-success" hidden="true">Generar cartola</button>
             </div>
             <div class="col-1 p-3">
                 <div class="spinner-border" role="status" hidden="true" id="idLoadGeneraLiq">
@@ -149,7 +156,7 @@
                 </div>
             </div>
             <div class="col-4 p-3">
-                <a href="" id="lnk_file" hidden="true" target="_blank" class="btn btn-info">Ver liquidación</a>
+                <a href="" id="lnk_file" hidden="true" target="_blank" class="btn btn-info">Ver cartola</a>
             </div>
         </div>
 </div>

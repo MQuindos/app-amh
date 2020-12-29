@@ -129,7 +129,7 @@ async function getResumenCtaCte_x_nCuenta(numCuenta, periodo) {
                     Where /*LTRIM(RTRIM(ISNULL(ARRENDATARIO,''))) != '' */
 					LTRIM(RTRIM(ISNULL(INMUEBLE,''))) != ''
                     order by CASE WHEN INMUEBLE = '' THEN 'OTROS' ELSE INMUEBLE END asc; `;
-            console.log('QUERY:::', qResumenCtaCte);
+            // console.log('QUERY:::', qResumenCtaCte);
 
             let data = await pool1.query(qResumenCtaCte);
 
@@ -230,7 +230,7 @@ async function getGastosGlobales_numCuenta(numCuenta, periodo) {
                 WHERE isnull(tmp_libro_arren_propiet.cod_propiedad,'0') = '0'                 
                 `;
 
-            //console.log('GASTOS GLOBALES:::',qGastos);
+            // console.log('GASTOS GLOBALES:::',qGastos);
             let data = await pool1.query(qGastos);
 
             return {
@@ -636,6 +636,126 @@ async function getInfoComision(numCuenta, periodo) {
     }
 }
 
+/**
+ * Calculo de comision de administración, de acuerdo a las reglas de las cuentas corrientes.
+ * @param {Numero de la cuenta corriente} numCta 
+ * @param {Periodo de la liquidación} periodo 
+ */
+async function calculoComision(numCta, periodo) {
+    try {
+        
+        const dOrdenAdmin = await infoOrdenAdministracion(numCta);
+        const dComision = await getInfoComision(numCta,periodo);
+        const propSanCamilo = await getPropiedadesArrendadasXSanCamilo();
+
+        let codPropiedadSanCamilo = [];
+        if(parseInt(numCta) == 10203) {
+
+            if(propSanCamilo.status) {
+
+                for (let z = 0; z < propSanCamilo.data.length; z++) {
+
+                    codPropiedadSanCamilo.push(propSanCamilo.data[z].cod_propiedad);                    
+                }
+            }
+        }
+
+        let totalComision = 0;
+        let calcComision = 0;
+        let totalCargos = 0;
+        let porcentComision = 0;
+
+        let resultOAD = null;
+
+        if(dOrdenAdmin.status) {
+            resultOAD = dOrdenAdmin.data;
+
+            /** CALCULO DE COMISION */            
+            for (let i = 0; i < resultOAD.length; i++) {
+                porcentComision = parseInt(resultOAD[i].porcentaje_comision);
+            }
+            
+            if(dComision.status) {
+                
+                for (let i = 0; i < dComision.data.length; i++) {
+
+                    /**SANTO DOMINGO */
+                    if(numCta == 10296) { 
+                        /**1:arriendos, 3:multas, 4:ggcc, 14:Rebaja de Arriendos, 15:Rebaja de Multas, 42:Anulacion Arriendos.  */
+                        if( dComision.data[i].id_mov == 1 || 
+                            dComision.data[i].id_mov == 3 || 
+                            dComision.data[i].id_mov == 4 || 
+                            dComision.data[i].id_mov == 14 || 
+                            dComision.data[i].id_mov == 15 ||
+                            dComision.data[i].id_mov == 42
+                            ) {
+                            calcComision += parseInt(dComision.data[i].ABONO);
+                            totalCargos += parseInt(dComision.data[i].CARGO);
+                        }
+
+                    }
+                    else if(numCta == 10203) 
+                    {
+                        /** CUENTA PACIFICO */
+                        if(propSanCamilo.status) {
+
+                            /*  1:Arriendos, 3:Multas, 14:Rebaja de Arriendos, 15:Rebaja de Multas , 42:Anulacion Arriendos.*/
+                            if(dComision.data[i].id_mov == 1 || 
+                                dComision.data[i].id_mov == 3 || 
+                                dComision.data[i].id_mov == 14 || 
+                                dComision.data[i].id_mov == 15 ||
+                                dComision.data[i].id_mov == 42 ) {
+
+                                /**VERIFICAMOS QUE LA PROPIEDAD NO SEA ARRENDADA POR SAN CAMILO...  */
+                                if(!codPropiedadSanCamilo.includes(dComision.data[i].cod_propiedad)) {
+                                    calcComision += parseInt(dComision.data[i].ABONO);
+
+                                    totalCargos += parseInt(dComision.data[i].CARGO);
+                                }
+                            }
+                        }
+                    }
+                    else 
+                    {
+                        /**
+                         * CALCULO COMISION TODAS LAS CUENTAS...
+                         *  1:Arriendos, 3:Multas, 14:Rebaja de Arriendos, 15:Rebaja de Multas, 42:Anulacion Arriendos.*/
+                        if(dComision.data[i].id_mov == 1 || 
+                            dComision.data[i].id_mov == 3 || 
+                            dComision.data[i].id_mov == 14 || 
+                            dComision.data[i].id_mov == 15 || 
+                            dComision.data[i].id_mov == 42 ) {
+
+                            calcComision += parseInt(dComision.data[i].ABONO);
+                            totalCargos += parseInt(dComision.data[i].CARGO);
+                        }
+                    }
+                }
+
+                //Calculamos el porcentaje de Comision
+                totalComision = ((porcentComision / 100) * (calcComision - totalCargos));
+                
+                //Calculamos y Sumamos el IVA 19%                
+                totalComision = (totalComision + ( (19 / 100) * totalComision)).toFixed(1);
+            
+            }
+        }
+    
+        return {
+            status : true,
+            resultOAD,
+            totalComision,
+            porcentComision
+        }
+
+    } catch (error) {
+        return {
+            status : false,
+            message: error.message
+        }
+    }
+}
+
 /** RETORNA PROPIEDADES DEL CLIENTE PACIFICO(SAN CAMILO), ARRENDADAS POR ELLOS MISMOS */
 async function getPropiedadesArrendadasXSanCamilo()
 {
@@ -675,18 +795,35 @@ async function getPropiedadesArrendadasXSanCamilo()
 /**
  * Calcula los montos por concepto de comisión administración y asesorias
  * @param {Numero de cuenta corriente} xncuenta 
+ * @param {Periodo de calculo de la comision} periodo 
  */
-async function comisiones_por_ctacte_periodoactual(xncuenta) {
+async function comisiones_por_ctacte_periodoactual(xncuenta,periodo) {
     try {
 
         let rs = await pool1.connect(); // Obtenemos la conexion
         let filter = '';
+        let filPeriodo = '';
         if(xncuenta !== 0) {
-            filter = `
-                AND l.codigo = ` + xncuenta + `
-            `;
+            filter = `  AND l.codigo = ${ xncuenta } `;
         }
         
+        if(periodo != 'init' && periodo != '') {
+            filPeriodo = `
+                AND idmovcaj in (
+                    Select libro_idmovcaj from tb_liquidacion_detalle 
+                    where periodo = '${periodo}' and num_cuentacte = ${xncuenta}
+                )  
+            `;
+        }
+        else
+        {
+            filPeriodo = `
+                AND idmovcaj not in (
+                    Select libro_idmovcaj from tb_liquidacion_detalle                    
+                )  
+            `;
+        }
+
         let qy = `
             SELECT codigo
                 ,SUM(CARGO) as TOTALCARGO
@@ -720,11 +857,12 @@ async function comisiones_por_ctacte_periodoactual(xncuenta) {
                             ,l.n_recibo as numRecibo
                             ,l.cod_tipdocto,l.cod_tipmovto
                         FROM libro_ctacte l
-                        WHERE nulo IS NULL /*AND l.codigo in( 10004,10298) AND isnull(monto,0) > 0 */
-                            AND l.fecha > getdate() -40
-                            AND idmovcaj  not in (
-                                Select libro_idmovcaj from tb_liquidacion_detalle
-                            )  AND isnull(l.cod_tipmovto,0) in (1,3,4,14,15,42)
+                        WHERE nulo IS NULL 
+                            /* AND l.fecha > getdate() -40 */
+                            
+                            ${ filPeriodo }
+
+                            AND isnull(l.cod_tipmovto,0) in (1,3,4,14,15,42)
                             AND l.cod_propiedad not in (
                                 /*PROPIEDADES SAN CAMILO*/
                                 Select pro.cod_propiedad
@@ -735,11 +873,8 @@ async function comisiones_por_ctacte_periodoactual(xncuenta) {
                                 Where codigo = 10203 and ar.estado = 'vigente'
                                     AND arrend.cod_arrendatario = '9203500022'
                                     AND pro.cod_propietario = '8988150048'
-                            )
-                            `   +
-                            filter
-                                +
-                            `
+                            )                            
+                            ${ filter }                                
                     ) as tmp_libro_arren_propiet
                     INNER JOIN tipo_documento td ON cod_tipdocto = td.idtipdoc
                     LEFT JOIN tipo_movimiento tm ON cod_tipmovto = tm.id_mov
@@ -809,6 +944,7 @@ module.exports = {
     getDetalleAbono,
     infoOrdenAdministracion,
     getInfoComision,
+    calculoComision,
     getPropiedadesArrendadasXSanCamilo,
     comisiones_por_ctacte_periodoactual
 

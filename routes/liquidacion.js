@@ -93,107 +93,21 @@ router.post('/liquidacion/getResumenCta', async(req, res) => {
 
         const resultCtaCte = await liquidacionController.getResumenCtaCte_x_nCuenta(numCta, periodo);
         const resultGastoGlobal = await liquidacionController.getGastosGlobales_numCuenta(numCta, periodo);
-        const dOrdenAdmin = await liquidacionController.infoOrdenAdministracion(numCta);
-        const dComision = await liquidacionController.getInfoComision(numCta,periodo);
-        const propSanCamilo = await liquidacionController.getPropiedadesArrendadasXSanCamilo();
-        let codPropiedadSanCamilo = [];
-        if(parseInt(numCta) == 10203) {
-
-            if(propSanCamilo.status) {
-
-                for (let z = 0; z < propSanCamilo.data.length; z++) {
-
-                    codPropiedadSanCamilo.push(propSanCamilo.data[z].cod_propiedad);                    
-                }
-            }
-        }        
+        const calculoComision = await liquidacionController.calculoComision(numCta, periodo);
+        const calculoAsesoria = await liquidacionController.comisiones_por_ctacte_periodoactual(numCta,periodo);
         
         let resultGB = null;
-        let resultOAD = null;
+        let comiAsesoria = 0;
+        let porcentAsesoria = 0;
+        if(calculoAsesoria.status) {
+            if(calculoAsesoria.data.length > 0) {
+                comiAsesoria = calculoAsesoria.data[0].total_comi_asesor;
+                porcentAsesoria = calculoAsesoria.data[0].comi_asesor;
+            }            
+        }        
 
         if (resultGastoGlobal.status) {
             resultGB = resultGastoGlobal.data;
-        }
-
-        let totalComision = 0;
-        let calcComision = 0;
-        let totalCargos = 0;
-        let porcentComision = 0;
-
-        if(dOrdenAdmin.status) {
-            resultOAD = dOrdenAdmin.data;
-
-            /** CALCULO DE COMISION */            
-            for (let i = 0; i < resultOAD.length; i++) {
-                porcentComision = parseInt(resultOAD[i].porcentaje_comision);
-            }
-            
-            if(dComision.status) {
-                
-                for (let i = 0; i < dComision.data.length; i++) {
-
-                    /**SANTO DOMINGO */
-                    if(numCta == 10296) { 
-                        /**1:arriendos, 3:multas, 4:ggcc, 14:Rebaja de Arriendos, 15:Rebaja de Multas, 42:Anulacion Arriendos.  */
-                        if( dComision.data[i].id_mov == 1 || 
-                            dComision.data[i].id_mov == 3 || 
-                            dComision.data[i].id_mov == 4 || 
-                            dComision.data[i].id_mov == 14 || 
-                            dComision.data[i].id_mov == 15 ||
-                            dComision.data[i].id_mov == 42
-                            ) {
-                            calcComision += parseInt(dComision.data[i].ABONO);
-                            totalCargos += parseInt(dComision.data[i].CARGO);
-                        }
-
-                    }
-                    else if(numCta == 10203) {
-                        /** CUENTA PACIFICO */
-                        if(propSanCamilo.status) {
-
-                            /*  1:Arriendos, 3:Multas, 14:Rebaja de Arriendos, 15:Rebaja de Multas , 42:Anulacion Arriendos.*/
-                            if(dComision.data[i].id_mov == 1 || 
-                                dComision.data[i].id_mov == 3 || 
-                                dComision.data[i].id_mov == 14 || 
-                                dComision.data[i].id_mov == 15 ||
-                                dComision.data[i].id_mov == 42 ) {
-
-                                /**VERIFICAMOS QUE LA PROPIEDAD NO SEA ARRENDADA POR SAN CAMILO...  */
-                                if(!codPropiedadSanCamilo.includes(dComision.data[i].cod_propiedad)) {
-                                    calcComision += parseInt(dComision.data[i].ABONO);
-
-                                    totalCargos += parseInt(dComision.data[i].CARGO);
-                                }
-                            }
-                        }
-                    }
-                    else {
-
-                        /**
-                         * CALCULO COMISION TODAS LAS CUENTAS...
-                         *  1:Arriendos, 3:Multas, 14:Rebaja de Arriendos, 15:Rebaja de Multas , 42:Anulacion Arriendos.*/
-                        if(dComision.data[i].id_mov == 1 || 
-                            dComision.data[i].id_mov == 3 || 
-                            dComision.data[i].id_mov == 14 || 
-                            dComision.data[i].id_mov == 15 || 
-                            dComision.data[i].id_mov == 42 ) {
-
-                            calcComision += parseInt(dComision.data[i].ABONO);
-                            // console.log('CARGO::',dComision.data[i].CARGO);
-                            totalCargos += parseInt(dComision.data[i].CARGO);
-                        }
-                    }
-                }
-
-                //Calculamos el porcentaje de Comision
-                totalComision = ((porcentComision / 100) * (calcComision - totalCargos));
-                // console.log('totalComision 1 :',totalComision);
-                //Calculamos y Sumamos el IVA 19%
-                //console.log('Calculo Comision Asesoria::',( (5 / 100) * (calcComision - totalCargos)));
-                totalComision = (totalComision + ( (19 / 100) * totalComision)).toFixed(1);
-                
-                //console.log('Total para calculo comision',calcComision,' Total comision::',totalComision, ' Total Cargos:',totalCargos);
-            }
         }
 
         if (resultCtaCte.status) {
@@ -203,9 +117,11 @@ router.post('/liquidacion/getResumenCta', async(req, res) => {
                 message : 'Información correcta.',
                 dataOK  : resultCtaCte.data,
                 dataGB  : resultGB,
-                dataOAD : resultOAD,
-                totalcomisionAdministracion : totalComision,
-                porcComision : porcentComision
+                dataOAD : calculoComision.resultOAD,
+                totalcomisionAdministracion : calculoComision.totalComision,
+                porcComision : calculoComision.porcentComision,
+                comiAsesoria,
+                porcentAsesoria
             });
 
         } else {
@@ -226,6 +142,8 @@ router.post('/liquidacion/getResumenCta', async(req, res) => {
     }
 
 });
+
+
 
 // router.get('/liquidacion/getDetalleAbono',async(req,res) => {
 
@@ -274,7 +192,7 @@ router.get('/liquidacion/getFilePdf', async(req, res) => {
 
 router.get('/liquidacion/comisionCtaCte',async(req,res) => {
     ssn = req.session;
-    let respDetalle = await liquidacionController.comisiones_por_ctacte_periodoactual(0);
+    let respDetalle = await liquidacionController.comisiones_por_ctacte_periodoactual(0,'init');
     
     return res.render('liquidaciones/comisionctas', {
         name_user: ssn.nombre,

@@ -270,6 +270,8 @@
                         let data = response.dataOK;
                         let comisionAdmin = response.totalcomisionAdministracion;
                         let porceComision = response.porcComision;
+                        let proceAsesoria = response.porcentAsesoria;
+                        let comiAsesoria = response.comiAsesoria;
                         let xHtml = '';
                         let i = 0;
                         let saldoFormat = 0;
@@ -308,7 +310,7 @@
                         $('#rs_footertotal').html(xFooter);
                         $('#xResumen').html(xHtml);
 
-                        //GASTOS GLOBALES
+                        //GASTOS GENERALES
                         let dataGB = response.dataGB;
                         let xHtmlGB = '';
                         let x = 0;
@@ -322,10 +324,7 @@
                         for(let regGB in dataGB)
                         {                            
 
-                            /*
-                                6 - Comisión Administración
-                                17 - Cargo por Liquidación
-                            */
+                            /* 6 - Comisión Administración  ||  17 - Cargo por Liquidación */                            
                             if(parseInt(dataGB[regGB].id_mov) != 6 && parseInt(dataGB[regGB].id_mov) != 17 )
                             {
                                 
@@ -343,7 +342,8 @@
                                         <tr>          
                                             <th scope="row">`+ x +`</th>                          
                                             <td>` + dataGB[regGB].FECHA+`</td>
-                                            <td title='` + dataGB[regGB].glosa + `'>` + dataGB[regGB].MOV+`</td>                                            
+                                            <td title='` + dataGB[regGB].glosa + `'>` + dataGB[regGB].MOV+`</td>  
+                                            
                                             <td>$ ` + separadorMiles(saldoTotal) +`</td>
                                         </tr> `;          
 
@@ -364,7 +364,7 @@
                         } /** FIN FOR  dataGB */
 
 
-                        /** TOTAL GASTOS GLOBALES */
+                        /** TOTAL GASTOS GENERALES */
                         if(x > 0) {
                             $('#xResumenGB').html(xHtmlGB);
 
@@ -382,8 +382,12 @@
                         }
                         
                         /** TOTAL LIQUIDACION */
+                        $('#val_asesoria').html(`<p class="text-secondary">$ ` + separadorMiles(comiAsesoria) + `</p>`);
+                        $('#txtPorcentAsesoria').html('<p>Comisión Asesoria (' + proceAsesoria + '%)</p>');
+
+                        /** TOTAL LIQUIDACION */
                         $('#val_comis').html(`<p class="text-secondary">$ ` + separadorMiles(comisionAdmin) + `</p>`);
-                        $('#txtPorcentComision').html('<p>Comisión Administración (' + porceComision + '%)</p>');
+                        $('#txtPorcentComision').html('<p>Comisión Administración (' + porceComision + '%) + IVA</p>');
                         $('#val_liq').html(` <b> $ ` + separadorMiles(parseInt(saldoFormat) - parseInt(comisionAdmin) + parseInt(saldoTotal)) +  `</b> `);                        
 
                         document.getElementById("idLoad").hidden = true;
