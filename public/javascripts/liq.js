@@ -324,8 +324,8 @@
                         for(let regGB in dataGB)
                         {                            
 
-                            /* 6 - Comisión Administración  ||  17 - Cargo por Liquidación */                            
-                            if(parseInt(dataGB[regGB].id_mov) != 6 && parseInt(dataGB[regGB].id_mov) != 17 )
+                            /* 6 - Comisión Administración  ||  17 - Cargo por Liquidación  ||  41 - Comisiones*/
+                            if(parseInt(dataGB[regGB].id_mov) != 6 && parseInt(dataGB[regGB].id_mov) != 17 && parseInt(dataGB[regGB].id_mov) != 41 )
                             {
                                 
                                 if(dataGB[regGB].genera == 'entrada')
@@ -381,14 +381,14 @@
 
                         }
                         
-                        /** TOTAL LIQUIDACION */
-                        $('#val_asesoria').html(`<p class="text-secondary">$ ` + separadorMiles(comiAsesoria) + `</p>`);
-                        $('#txtPorcentAsesoria').html('<p>Comisión Asesoria (' + proceAsesoria + '%)</p>');
+                        /** TOTAL ASESORIA */
+                        $('#val_asesoria').html(`<b><p class="text-secondary">$ ` + separadorMiles(comiAsesoria) + `</p></b>`);
+                        $('#txtPorcentAsesoria').html('<b><p>Comisión Asesoria (' + proceAsesoria + '%)</p></b>');
 
                         /** TOTAL LIQUIDACION */
-                        $('#val_comis').html(`<p class="text-secondary">$ ` + separadorMiles(comisionAdmin) + `</p>`);
-                        $('#txtPorcentComision').html('<p>Comisión Administración (' + porceComision + '%) + IVA</p>');
-                        $('#val_liq').html(` <b> $ ` + separadorMiles(parseInt(saldoFormat) - parseInt(comisionAdmin) + parseInt(saldoTotal)) +  `</b> `);                        
+                        $('#val_comis').html(`<b><p class="text-secondary">$ ` + separadorMiles(comisionAdmin) + `</p></b>`);
+                        $('#txtPorcentComision').html('<b><p>Comisión Administración (' + porceComision + '%) + IVA</p></b>');
+                        $('#val_liq').html(`<b> $ ` + separadorMiles(parseInt(saldoFormat) - parseInt(comisionAdmin) + parseInt(saldoTotal) - parseInt(comiAsesoria)) +  `</b> `);                        
 
                         document.getElementById("idLoad").hidden = true;
                         document.getElementById("btnGeneraLiq").hidden = false; 

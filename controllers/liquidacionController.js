@@ -736,7 +736,7 @@ async function calculoComision(numCta, periodo) {
                 totalComision = ((porcentComision / 100) * (calcComision - totalCargos));
                 
                 //Calculamos y Sumamos el IVA 19%                
-                totalComision = (totalComision + ( (19 / 100) * totalComision)).toFixed(1);
+                totalComision = (totalComision + ( (19 / 100) * totalComision)).toFixed(0);
             
             }
         }
@@ -832,12 +832,12 @@ async function comisiones_por_ctacte_periodoactual(xncuenta,periodo) {
                 ,ISNULL(comision_admin.por_comision,0) as comi_admin
                 ,ISNULL(CAST(
                     (comision_admin.por_comision * ( SUM(ABONO) -SUM(CARGO)) /100) + (19 * (comision_admin.por_comision * ( SUM(ABONO) -SUM(CARGO)) /100) /100)
-                as decimal(18,2)),0) as total_comi_adm
+                as decimal(18,0)),0) as total_comi_adm
                 , isnull(porcentaje_comision,0) as comi_asesor
                 ,ISNULL(CAST(CASE WHEN porcentaje_comision IS NOT NULL
                         THEN
                             (porcentaje_comision * ( SUM(ABONO) -SUM(CARGO)) /100)
-                        ELSE 0 END as decimal(18,2)),0) AS total_comi_asesor
+                        ELSE 0 END as decimal(18,0)),0) AS total_comi_asesor
             
             FROM (
                 SELECT TIPO
