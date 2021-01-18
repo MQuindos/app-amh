@@ -25,24 +25,37 @@ router.post('/liquidacion/getPeriodo', async(req, res) => {
 
     let numCta = req.body.nCtaCte;
     let periodoCtaCte = await liquidacionController.getPeriodo_ctaCte(numCta);
+    let configCtaCteSaldoAcum = await liquidacionController.getCtacte_Config_AcumSaldo(numCta);    
+    let saldoAcumulado = 0;
+
+    //VALIDAMOS EL ESTADO DE SALDO ACUMULADO...
+    if(configCtaCteSaldoAcum.status && configCtaCteSaldoAcum.data.length) {
+        saldoAcumulado = configCtaCteSaldoAcum.data[0].acumula_saldo
+    }
 
     if (periodoCtaCte.status) {
 
         return res.json({
             status: true,
             message: 'Información correcta.',
-            dataOK: periodoCtaCte.data
+            dataOK: periodoCtaCte.data,
+            dataConfigSaldoAcum: saldoAcumulado
         });
 
     } else {
 
         return res.json({
             status: false,
-            message: 'Problemas al obtener la información, intenta nuevamente.'
+            message: 'Problemas al obtener la información, intente nuevamente.'
         });
     }
 
 });
+
+router.post('/liquidacion/saveConfigAcumSaldo',async(req,res) => {
+    return await liquidacionController.saveConfigSaldoAcum(req,res);
+});
+
 
 router.get('/liquidacion/getDetalleCuenta', async(req, res) => {
 

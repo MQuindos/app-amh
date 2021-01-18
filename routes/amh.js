@@ -251,16 +251,16 @@ async function saveDataExcel(row) {
 
         let rsDetalle = await pool1.connect(); // Obtenemos la conexion
         let qyDetalle = ' Insert into amh_detallepago_ccierta_dataretorno(  ' +
-        ' cc_num_contrato,cc_arr_rut,cc_arr_dv,cc_tipo_contrato,cc_arrendatario,cc_arr_mail  ' +
-        ' ,cc_propiedad,cc_fecha_pago,cc_tipo_moneda  ' +
-        ' ,cc_num_cuota	,cc_deuda_anterior,cc_ggcc_saldo_anterior  ' +
-        ' ,cc_periodo_cobro, cc_arriendo,cc_ggcc	 ' +
-        ' ,cc_multas ,cc_total_pagar,ret_proces_id	)  ' +
-        ' Select [Numero Contrato],Rut,Dv,[Tipo Contrato],Arrendatario,[E-mail]  ' +
-        ' , Propiedad,[Fecha Pago],[TIPO MONEDA]  ' +
-        ' , [N Cuota],[Deuda Atrasada],[Gastos Comunes SA] ' +
-        ' , [PERIODO DE COBRO] , [Arriendo]	 ,[Gastos Comunes CM] ,Multas ' +
-        ' ,[TOTAL A PAGAR], ' + id_InsertDataRetorno + ' ' +
+            ' cc_num_contrato,cc_arr_rut,cc_arr_dv,cc_tipo_contrato,cc_arrendatario,cc_arr_mail  ' +
+            ' ,cc_propiedad,cc_fecha_pago,cc_tipo_moneda ' +
+            ' ,cc_num_cuota	,cc_deuda_anterior,cc_ggcc_saldo_anterior ' +
+            ' ,cc_periodo_cobro, cc_arriendo,cc_ggcc ' +
+            ' ,cc_multas ,cc_total_pagar,ret_proces_id) ' +
+        ' Select [Numero Contrato],Rut,Dv,[Tipo Contrato],Arrendatario,[E-mail] ' +
+            ' , Propiedad,[Fecha Pago],[TIPO MONEDA] ' +
+            ' , [N Cuota],[Deuda Atrasada],[Gastos Comunes SA] ' +
+            ' , [PERIODO DE COBRO] , [Arriendo]	 ,[Gastos Comunes CM] ,Multas ' +
+            ' ,[TOTAL A PAGAR], ' + id_InsertDataRetorno + ' ' +
         ' from amh_cartera_cierta_uf_peso ' +
         ' where [Numero Contrato]  = ' + row.NUMERO_OPERACION + '; SELECT SCOPE_IDENTITY() AS idInsertDetalle;';
         let rsqyDetalle = await pool1.query(qyDetalle);
@@ -294,6 +294,7 @@ async function saveDataExcel(row) {
         };
 
     } catch (err) {
+        
         console.log('ERROR CARGA:::', err.message);
         return {
             status: false,
@@ -412,6 +413,9 @@ async function executeExe(dataProcess) {
                         x++;
                         if(dataProcess.length === x) {
                             //ENVIAMOS MAIL TRAS FINALIZAR EJECUCION
+
+                            //let ress = await executeSp_CalculaDeuda();
+                            //console.log('ress sp::',ress);
                             prepareMail(); 
                         }                        
                     } 
@@ -441,6 +445,34 @@ async function executeExe(dataProcess) {
     }
 }
 
+async function executeSp_CalculaDeuda() {
+    try {
+
+        // let rs = await pool1.connect(); // Obtenemos la conexion
+
+        let results = await pool1.request()                
+        //.output('output_parameter', sql.VarChar(50))
+        .execute('sp_AB_CarteraConocida_UF_PESO');
+
+        console.log('resultsresults:: sp  [',results);
+
+        // let rsqyDetalleUpdate = await pool1.execute(qy);
+        // let rsqyDetalleUpdate = await pool1.query(qy);
+
+        return {
+            status: true,
+            message: 'Registros procesados correctamente.'
+        }
+        
+    } catch (error) {
+
+        return {
+            status: false,
+            message: error.message
+        }
+        
+    }
+}
 
 async function prepareMail() {
     try {

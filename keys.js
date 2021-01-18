@@ -5,7 +5,7 @@ module.exports = {
     server: 'MQVSDB01',
     user: process.env.SERVERUSR,
     password: process.env.SERVERPASS,
-    database: 'MQSISX_AMH',
+    database: 'MQSISX',
     pool: {
         max: 10,
         min: 0,

@@ -834,7 +834,7 @@ async function comisiones_por_ctacte_periodoactual(xncuenta,periodo) {
                     (comision_admin.por_comision * ( SUM(ABONO) -SUM(CARGO)) /100) + (19 * (comision_admin.por_comision * ( SUM(ABONO) -SUM(CARGO)) /100) /100)
                 as decimal(18,0)),0) as total_comi_adm
                 , isnull(porcentaje_comision,0) as comi_asesor
-                ,ISNULL(CAST(CASE WHEN porcentaje_comision IS NOT NULL
+                ,ISNULL(CAST(CASE WHEN isnull(porcentaje_comision,0) != 0
                         THEN
                             (porcentaje_comision * ( SUM(ABONO) -SUM(CARGO)) /100)
                         ELSE 0 END as decimal(18,0)),0) AS total_comi_asesor
@@ -933,6 +933,114 @@ async function comisiones_por_ctacte_periodoactual(xncuenta,periodo) {
     }
 }
 
+
+async function getCtacte_Config_AcumSaldo(xNumCuenta)
+{
+    try {
+        if(parseInt(xNumCuenta) !== 0) {        
+
+            let rs = await pool1.connect(); // Obtenemos la conexion
+            let qy = `
+                select id,num_ctacte,acumula_saldo
+                from tb_config_cartola_ctacte
+                where num_ctacte = ${xNumCuenta } ;
+            `;
+
+            let data = await pool1.query(qy);
+
+            return {
+                status: true,
+                message: 'Ejecución Correcta',
+                data: data.recordset
+            }
+
+        } else {
+
+            return {
+                status: false,
+                message: 'Parametro no válido...'
+            }
+
+        }
+
+    } catch (error) {
+        return {
+            status :false,
+            message : error.message            
+        }
+    }
+}
+
+async function saveConfigSaldoAcum(req,res)
+{
+    try {
+        
+        let xNumCta = req.body.xCtaSelec;
+        let xConfigSaldoAcum = req.body.acumSal;
+        
+
+        if(parseInt(xNumCta) !== 0) {        
+            let rs = await pool1.connect(); // Obtenemos la conexion
+            let qy = `
+                    select id,num_ctacte,acumula_saldo
+                    from tb_config_cartola_ctacte
+                    where num_ctacte = ${xNumCta } ;
+                `;
+
+            let data = await pool1.query(qy);
+            let queryAc = '';
+            if(data.recordset.length > 0) {
+                queryAc = `
+                    UPDATE tb_config_cartola_ctacte 
+                    SET acumula_saldo = ${ xConfigSaldoAcum }
+                    WHERE num_ctacte = ${xNumCta };
+                `;
+            } else {
+                
+                queryAc = `
+                    INSERT INTO tb_config_cartola_ctacte(fecha,num_ctacte,acumula_saldo) 
+                    VALUES(getdate(),${xNumCta},${ xConfigSaldoAcum });                    
+                `;
+
+            }
+
+            let rss = await pool1.connect(); // Obtenemos la conexion
+
+            let respAcum = await pool1.query(queryAc);
+
+            // let rs = await pool1.connect(); // Obtenemos la conexion
+            // let qy = `
+            //     select id,num_ctacte,acumula_saldo
+            //     from tb_config_cartola_ctacte
+            //     where num_ctacte = ${xNumCuenta } ;
+            // `;
+
+            // let data = await pool1.query(qy);
+
+            return res.json({
+                status: true,
+                message: 'Ejecución Correcta'
+            }) ;
+
+        } else {
+
+            return res.json({
+                status :false,
+                message : 'Parámetros no válidos!'
+            }) ;
+
+        }
+
+    } catch (error) {
+        return res.json({
+            status :false,
+            message : error.message
+        }) ;
+        
+    }
+}
+
+
 module.exports = {
     getListado_CtaCte,
     getResumenCtaCte_x_nCuenta,
@@ -946,6 +1054,8 @@ module.exports = {
     getInfoComision,
     calculoComision,
     getPropiedadesArrendadasXSanCamilo,
-    comisiones_por_ctacte_periodoactual
+    comisiones_por_ctacte_periodoactual,
+    getCtacte_Config_AcumSaldo,
+    saveConfigSaldoAcum
 
 }

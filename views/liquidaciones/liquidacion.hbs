@@ -34,7 +34,7 @@
                                 {{#each dataCtaCte}}
                                     <option data-tokens="{{codigo}}" value="{{codigo}}">{{codigo }} - {{nombrectacte}}</option>
                                 {{/each}}
-                            </select>                    
+                            </select>
                                             
                     </div>
                     
@@ -52,7 +52,28 @@
                         <button type="button" title="Mostrar información de Cuenta Corriente" id="btnEnviar" class="btn btn-success btn-sm">Mostrar</button>
                     </div>
                </div>
+                <hr>
+               <div class="row" id="divOpcionSaldo" class="collapse" style="display:none">
+                   <div class="col-3">
+                       <b>Acumula saldo?</b>
+                   </div>
+                   <div class="col-2">
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="customRadioInline1" name="customRadioInline1" class="custom-control-input" value="1">
+                            <label class="custom-control-label" for="customRadioInline1">Si</label>
+                        </div>
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="customRadioInline2" name="customRadioInline1" class="custom-control-input" value="0" checked>
+                            <label class="custom-control-label" for="customRadioInline2">No</label>
+                        </div>
+                        
+                   </div>
+                   <div class="col-4">
+                       <button type="button" title="Guardar opción" id="btnSaveConfig" class="btn btn-success btn-sm">Guardar opción</button>
+                   </div>
+               </div>
             </div>
+
         </div>
        
     <hr>
@@ -143,7 +164,7 @@
         <hr>
         <div class="row">            
                 <div class="col-10"><b> Total Cartola</b></div>
-                <div class="col-2" id="val_liq"></div>            
+                <div class="col-2" id="val_liq"></div>
         </div>
         <hr>
         <div class="row">    
@@ -159,6 +180,28 @@
                 <a href="" id="lnk_file" hidden="true" target="_blank" class="btn btn-info">Ver cartola</a>
             </div>
         </div>
+        <hr>
+        <div id="divSaldoAcum" class="font-weight-bold titulos">
+                Saldos
+            </div>
+        
+        <div class="row p-2">
+            <div class="col-4">
+                <div > Saldo Acumulado</div>
+            </div>
+            <div class="col-4 ">
+                <div id="valAcum"></div>
+            </div>
+        </div>
+         <div class="row p-2">
+            <div class="col-4">
+                <div > Saldo Acumulado en Contra</div>
+            </div>
+            <div class="col-4">
+                <div  id="valEnContra"></div>
+            </div>
+        </div>
+        
 </div>
 
 

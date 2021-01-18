@@ -208,8 +208,9 @@
          
         document.getElementById("lnk_file").hidden = true;
         let nCtaCte = this.selectedOptions[0].value;        
-        if(nCtaCte.trim() != 'init' && nCtaCte.trim() != '')
+        if(nCtaCte.trim() !== 'init' && nCtaCte.trim() !== '')
         {
+            $('#divOpcionSaldo').toggle(true);
             clearValores();
 
             $.ajax({
@@ -217,6 +218,7 @@
                 data: {'nCtaCte' : nCtaCte},
                 url: '/liquidacion/getPeriodo',
                 success: function (response) {
+
                     if(response.status)
                     {
                         let html = '<option selected="selected" value="init">-- Periodo actual --</option>';
@@ -228,6 +230,9 @@
 
                         $('#sl_periodo').html(html);
                         $('#sl_periodo').selectpicker('refresh');
+
+                        (parseInt(response.dataConfigSaldoAcum) === 1) ? $("#customRadioInline1").prop("checked", true) : $("#customRadioInline2").prop("checked", true);
+                        
                     }    
                     else
                     {
@@ -240,6 +245,9 @@
         }
         else
         {
+            $('#divOpcionSaldo').toggle(false);
+            $("#customRadioInline2").prop("checked", true);
+            
             let html = '<option selected="selected" value="init">-- Selecciona Cuenta Corriente --</option>';
             $('#sl_periodo').html(html);
             clearValores();        
@@ -277,6 +285,9 @@
                         let saldoFormat = 0;
                         let ingresoFormat = 0;
                         let egresoFormat = 0;
+                        
+                        $('#valEnContra').html('$ 0');
+                        $('#valAcum').html('$ 0');
 
                         for(let reg in data)
                         {
@@ -324,8 +335,18 @@
                         for(let regGB in dataGB)
                         {                            
 
-                            /* 6 - Comisión Administración  ||  17 - Cargo por Liquidación  ||  41 - Comisiones*/
-                            if(parseInt(dataGB[regGB].id_mov) != 6 && parseInt(dataGB[regGB].id_mov) != 17 && parseInt(dataGB[regGB].id_mov) != 41 )
+                            /* 
+                                6 - Comisión Administración  ||  17 - Cargo por Liquidación  
+                                || 41 - Comisiones 
+                                || 37 - Saldo a favor acumulado
+                                || 38 - Saldo en contra acumulado
+                            */
+                            if(parseInt(dataGB[regGB].id_mov) != 6 
+                                && parseInt(dataGB[regGB].id_mov) != 17 
+                                && parseInt(dataGB[regGB].id_mov) != 41 
+                                && parseInt(dataGB[regGB].id_mov) != 37 
+                                && parseInt(dataGB[regGB].id_mov) != 38 
+                                )
                             {
                                 
                                 if(dataGB[regGB].genera == 'entrada')
@@ -349,6 +370,16 @@
 
                                         // <td>$ ` + separadorMiles((dataGB[regGB].genera == 'entrada'? dataGB[regGB].MONTO : 0)) +`</td>
                                         //     <td>$ ` + separadorMiles((dataGB[regGB].genera == 'salida'?  dataGB[regGB].MONTO : 0)) +`</td>
+                            }
+
+                            
+                            if(parseInt(dataGB[regGB].id_mov) === 37 ) {
+                                $('#valAcum').html('$ ' + separadorMiles(dataGB[regGB].MONTO));
+                            }
+
+                            if(parseInt(dataGB[regGB].id_mov) === 38) {
+                                
+                                $('#valEnContra').html('$ ' + separadorMiles(dataGB[regGB].MONTO));
                             }
                             // else //OBTIENE EL VALOR DE COMISION Y MONTO LIQUIDADO INGRESADO EN MQSIS
                             // {
@@ -396,7 +427,7 @@
                     }
                     else
                     {
-                        console.log('response::',response);
+                        // console.log('response::',response);
                         let hmlError = response.message ;
                         $('#txtResult').html(hmlError);
                         $("#modalMessage").modal('show');     
@@ -455,3 +486,36 @@
 
     });
 
+    document.getElementById('btnSaveConfig').addEventListener('click', function () {
+
+        var eCta = document.getElementById("sl_ctacte");
+        var xCtaSelec = eCta.options[eCta.selectedIndex].value;
+
+        var acumSal =  $("input[name=customRadioInline1]:checked").val();
+
+        $.ajax({
+                method: 'POST',
+                url: '/liquidacion/saveConfigAcumSaldo',
+                data:{ xCtaSelec,acumSal},
+                success: function (resp) {
+                    
+                    if(resp.status)
+                    {                        
+                        $('#txtResult').html('Guardado Correctamente!!');
+                        $("#modalMessage").modal('show');    
+                    }
+                    else
+                    {                        
+                        $('#txtResult').html('Problemas al guardar...');
+                        $("#modalMessage").modal('show');
+                    }                    
+                }
+        });
+
+    });
+
+
+function verificaAcomulaSaldo()
+{
+    //divOpcionSaldo
+}
