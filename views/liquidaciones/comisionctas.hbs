@@ -23,6 +23,33 @@
             </div>
         </div>
 
+<div class="card">
+            <div class="card-header font-weight-bold titulos">
+                Fecha Liquidación
+            </div>
+            <div class="card-body">
+                <div class="row">
+                  <div class="col-3">
+                        <select class="selectpicker" id="sl_dialiquidacion" data-live-search="true" data-width="80%" data-size="5" >
+                                <option value="init"> - - Selecciona - - </option>                                
+                                <option data-tokens="10" value="10">Dia 10</option>
+                                <option data-tokens="10" value="10">Dia 15</option>
+                                <option data-tokens="10" value="10">Dia 30</option>
+                        </select>
+                  </div>    
+                  <div class="col-1">
+                        <div class="spinner-border" role="status" hidden="true" id="idLoad">
+                          <span class="sr-only">Cargando...</span>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <button type="button" title="Mostrar cuentas según fecha liquidación" id="btnBuscar" class="btn btn-success btn-sm">Buscar</button>
+                    </div>                
+                </div>               
+            </div>            
+        </div> <!-- END CARD-->
+
+        <hr>
         <div class="card">
             <div class="card-header font-weight-bold titulos">
                 Comisión Administración y Asesoría
@@ -46,7 +73,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {{#each data}}
+                                {{!-- {{#each data}}
                                 <tr>
                                     <td> {{ incremented @index }}</td>
                                     <td>{{codigo}}</td>                                    
@@ -67,7 +94,7 @@
 
                                     <td style=" {{#if (lt total_comi_asesor 0) }} color:#F40E26 {{/if}}">{{numberFormat total_comi_asesor}}</td>
                                 </tr>
-                                {{/each}}                 
+                                {{/each}}                  --}}
                             </tbody>
                         </table>
                     </div>
@@ -88,7 +115,7 @@
                     </div>
                 </div>
                 <div class="col-2">
-                    <button type="button" title="Generar comsión administración y asesorias" id="btnGenerarAsesoriaComision" class="btn btn-success btn-sm">Generar Cargos</button>
+                    <button type="button" title="Generar comsión administración y asesorias" id="btnGenerarAsesoriaComision" class="btn btn-success btn-sm">Generar Comprobantes</button>
                 </div>
             </div>
        

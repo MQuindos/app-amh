@@ -209,7 +209,7 @@
         document.getElementById("lnk_file").hidden = true;
         let nCtaCte = this.selectedOptions[0].value;        
         if(nCtaCte.trim() !== 'init' && nCtaCte.trim() !== '')
-        {
+        {            
             $('#divOpcionSaldo').toggle(true);
             clearValores();
 
@@ -231,6 +231,7 @@
                         $('#sl_periodo').html(html);
                         $('#sl_periodo').selectpicker('refresh');
 
+                        //Marcamos el radio correspondeiente a saldo acumulado (si/no)
                         (parseInt(response.dataConfigSaldoAcum) === 1) ? $("#customRadioInline1").prop("checked", true) : $("#customRadioInline2").prop("checked", true);
                         
                     }    
@@ -247,6 +248,8 @@
         {
             $('#divOpcionSaldo').toggle(false);
             $("#customRadioInline2").prop("checked", true);
+            // document.getElementById("btnCargo").hidden = true;
+            document.getElementById("btnGeneraLiq").hidden = true;
             
             let html = '<option selected="selected" value="init">-- Selecciona Cuenta Corriente --</option>';
             $('#sl_periodo').html(html);
@@ -264,14 +267,25 @@
 
         if(xCtaSelec.trim() != 'init' && xCtaSelec.trim() != '')
         {
-            document.getElementById("idLoad").hidden = false;           
+            if(xPeriodoSelec == 'init' || xPeriodoSelec == '') {
+                // document.getElementById("btnCargo").hidden = false;
+                document.getElementById("btnGeneraLiq").hidden = false;
+            }
+            else 
+            {
+                // document.getElementById("btnCargo").hidden = true;
+                document.getElementById("btnGeneraLiq").hidden = true;
+            }
+
+            document.getElementById("idLoad").hidden = false;            
 
             $.ajax({
                 method: 'POST',        
                 data: {'nCtaCte' : xCtaSelec,'periodo':xPeriodoSelec},
                 url: '/liquidacion/getResumenCta',
-                success: function (response) {
-
+                success: function (response) {     
+                    
+                    console.log(response);
                     if(response.status)
                     {
                         //RESUMEN
@@ -301,10 +315,7 @@
                                         <td>` + data[reg].ARRENDATARIO+`</td>                                    
                                         
                                         <td style="`+(parseInt(data[reg].TOTAL_RESUMEN) < 0 ? 'color:#F40E26':'')+`"> $ ` + separadorMiles(data[reg].TOTAL_RESUMEN)+`</td>                                        
-                                    </tr> `;                        
-
-                                    // <td>$ ` + separadorMiles(data[reg].INGRESOS) +`</td>
-                                    //     <td>$ ` + separadorMiles(data[reg].EGRESOS) +`</td>
+                                    </tr> `;
 
                         } /** FIN FOR data */
 
@@ -336,7 +347,8 @@
                         {                            
 
                             /* 
-                                6 - Comisión Administración  ||  17 - Cargo por Liquidación  
+                                6 - Comisión Administración  
+                                ||  17 - Cargo por Liquidación  
                                 || 41 - Comisiones 
                                 || 37 - Saldo a favor acumulado
                                 || 38 - Saldo en contra acumulado
@@ -373,10 +385,12 @@
                             }
 
                             
+                            //SALDOS ACUMULADOS
                             if(parseInt(dataGB[regGB].id_mov) === 37 ) {
                                 $('#valAcum').html('$ ' + separadorMiles(dataGB[regGB].MONTO));
                             }
 
+                            //SALDOS ACUMULADOS EN CONTRA...
                             if(parseInt(dataGB[regGB].id_mov) === 38) {
                                 
                                 $('#valEnContra').html('$ ' + separadorMiles(dataGB[regGB].MONTO));
@@ -422,8 +436,6 @@
                         $('#val_liq').html(`<b> $ ` + separadorMiles(parseInt(saldoFormat) - parseInt(comisionAdmin) + parseInt(saldoTotal) - parseInt(comiAsesoria)) +  `</b> `);                        
 
                         document.getElementById("idLoad").hidden = true;
-                        document.getElementById("btnGeneraLiq").hidden = false; 
-
                     }
                     else
                     {
@@ -432,7 +444,7 @@
                         $('#txtResult').html(hmlError);
                         $("#modalMessage").modal('show');     
                         document.getElementById("idLoad").hidden= true;
-                        document.getElementById("btnGeneraLiq").hidden = true; 
+                        document.getElementById("btnGeneraLiq").hidden = true;                        
                         
                     }
                 }
@@ -450,6 +462,20 @@
     document.getElementById('sl_periodo').addEventListener('change', function () { 
         clearValores();
         document.getElementById("lnk_file").hidden = true;
+        let cuenta = document.getElementById("sl_ctacte");
+        var xCtaSelec = cuenta.options[cuenta.selectedIndex].value;
+        let periodo =  this.selectedOptions[0].value;
+
+        if(periodo.trim() == 'init' || periodo.trim() == '') {
+
+            // document.getElementById("btnCargo").hidden = false;
+            document.getElementById("btnGeneraLiq").hidden = false;
+        }
+        else
+        {
+            // document.getElementById("btnCargo").hidden = true;
+            document.getElementById("btnGeneraLiq").hidden = true;
+        }
     });
 
     document.getElementById('btnGeneraLiq').addEventListener('click', function () {
@@ -470,7 +496,7 @@
                     if(resp.status)
                     {
                         var a = document.getElementById('lnk_file');                    
-                        a.href = '/download/'+resp.pathfile;
+                        a.href = '/download/comprobantes/'+resp.pathfile;
 
                         document.getElementById("idLoadGeneraLiq").hidden = true;
                         document.getElementById("lnk_file").hidden = false;
@@ -514,8 +540,31 @@
 
     });
 
+    // document.getElementById('btnCargo').addEventListener('click', function () {
 
-function verificaAcomulaSaldo()
-{
-    //divOpcionSaldo
-}
+    //     document.getElementById("idLoadGeneraLiq").hidden = false;
+    //     let cuenta = document.getElementById("sl_ctacte");
+    //     var xCtaSelec = cuenta.options[cuenta.selectedIndex].value;
+
+    //     $.ajax({
+    //             method: 'GET',
+    //             url: '/liquidacion/getComprobanteLiqCargo',
+    //             data:{ xCtaSelec },
+    //             success: function (resp) {
+
+    //                 console.log('respresp:: ',resp);
+    //                 if(resp.status)
+    //                 {
+    //                     document.getElementById("idLoadGeneraLiq").hidden = true;
+    //                 }
+    //                 else
+    //                 {
+    //                     document.getElementById("idLoadGeneraLiq").hidden = true;
+    //                     let html = resp.message;
+    //                     $('#txtResult').html(html);
+    //                     $("#modalMessage").modal('show');
+    //                 }                    
+    //             }
+    //     });
+
+    // });

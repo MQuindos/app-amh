@@ -108,13 +108,14 @@ router.post('/liquidacion/getResumenCta', async(req, res) => {
         const resultGastoGlobal = await liquidacionController.getGastosGlobales_numCuenta(numCta, periodo);
         const calculoComision = await liquidacionController.calculoComision(numCta, periodo);
         const calculoAsesoria = await liquidacionController.comisiones_por_ctacte_periodoactual(numCta,periodo);
-        
+
         let resultGB = null;
         let comiAsesoria = 0;
         let porcentAsesoria = 0;
         if(calculoAsesoria.status) {
             if(calculoAsesoria.data.length > 0) {
-                comiAsesoria = calculoAsesoria.data[0].total_comi_asesor;
+                //comiAsesoria = calculoAsesoria.data[0].total_comi_asesor;
+                comiAsesoria = calculoComision.totalcomisionasesoria
                 porcentAsesoria = calculoAsesoria.data[0].comi_asesor;
             }            
         }        
@@ -124,6 +125,9 @@ router.post('/liquidacion/getResumenCta', async(req, res) => {
         }
 
         if (resultCtaCte.status) {
+
+            // console.log('porcentAsesoria::',porcentAsesoria, ' comiAsesoria::',comiAsesoria);
+            // console.log('porcentAsesoria::',porcentAsesoria, ' comiAsesoria::',comiAsesoria);
 
             return res.json({
                 status: true,
@@ -185,32 +189,102 @@ router.post('/liquidacion/getResumenCta', async(req, res) => {
 
 router.get('/liquidacion/getFilePdf', async(req, res) => {
 
-    ssn = req.session;
+    try {
+        ssn = req.session;
     
-    let { xCtaSelec,xPeriodoSelec } = req.query;
-    let resp = await pdfcreate.createPDF( xCtaSelec, xPeriodoSelec, ssn.nombre);
-    
-    return res.json({
-        status:resp.status,
-        pathfile:resp.pathPdf,
-        message:resp.message
-    });   
+        let { xCtaSelec,xPeriodoSelec } = req.query;
+        let resp = await pdfcreate.createPDF( xCtaSelec, xPeriodoSelec, ssn.nombre);
+        let respComprobante = await pdfcreate.createComprobanteCargoLiquidacion(xCtaSelec);
+
+        console.log('resp::',resp);
+        
+        return res.json({
+            status:resp.status,
+            pathfile:resp.pathPdf,
+            pathPdf: respComprobante.pathPdf,
+            pathPdfCargoComAdm : respComprobante.pathCrgComiAdm,
+            pathPdfCargoComAsesor : respComprobante.pathCrgAsesor,
+            message:resp.message
+        });    
+
+    } catch (error) {
+
+        console.log(error);
+        return res.json({
+            status:false,
+            message:error.message
+        });
+        
+        
+    }
     
 
 });
 
+
+/**
+ * COMPROBANTES
+*/
+router.get('/liquidacion/getComprobanteLiqCargo', async(req, res) => {
+
+    ssn = req.session;
+
+    try {
+        
+        let { xCtaSelec } = req.query;
+        let resp = await pdfcreate.createComprobanteCargoLiquidacion(xCtaSelec);
+        if(resp.status) {
+
+            res.json({
+                status : resp.status,
+                pathPdf: resp.pathPdf,
+                pathPdfCargoComAdm : resp.pathCrgComiAdm,
+                pathPdfCargoComAsesor : resp.pathCrgAsesor,
+                message :resp.message
+            });
+            
+        }
+        else
+        {
+            res.json({
+                status : false,
+                message : resp.message
+            });
+        }    
+    } catch (error) {
+        res.json( {
+            status : false,
+            message: error.message
+        });
+    }
+
+});
+
+
 /**
  * COMISIONES : ADMINISTRACION - ASESORIAS
  */
-
 router.get('/liquidacion/comisionCtaCte',async(req,res) => {
     ssn = req.session;
+    //let respDetalle = await liquidacionController.comisiones_por_ctacte_periodoactual(0,'init');
+    
+    return res.render('liquidaciones/comisionctas', {
+        name_user: ssn.nombre,
+        nombrelog: 'ssd',
+        //data:respDetalle.data
+    });
+
+});
+
+router.get('/liquidacion/comisionCtaCtePorDiaLiquidacion',async(req,res) => {
+    ssn = req.session;
+    let {xfecha} = req.query;
     let respDetalle = await liquidacionController.comisiones_por_ctacte_periodoactual(0,'init');
     
     return res.render('liquidaciones/comisionctas', {
         name_user: ssn.nombre,
         nombrelog: 'ssd',
-        data:respDetalle.data
+        //data:respDetalle.data
     });
 
 });

@@ -2,19 +2,21 @@
 
 const mssql = require('mssql');
 const database = require('../keys');
+const numpalabra = require('./numPalabra');
+const moment = require('moment');
 const pool1 = new mssql.ConnectionPool(database);
 
 /**
  * OBTIENE EL LISTADO DE CUENTAS CORRIENTES
  */
 async function getListado_CtaCte() {
-    try {
+    try {        
 
         let rs = await pool1.connect(); // Obtenemos la conexion        
         let qListado = `SELECT codigo, 
              nombrectacte, cuentacerrada 
              FROM cuentascorrientes 
-             WHERE cuentacerrada = 'NO' AND codigo < 50000
+             WHERE cuentacerrada = 'NO' AND codigo < 50000             
              ORDER BY codigo; `;
 
         let data = await pool1.query(qListado);
@@ -74,6 +76,7 @@ async function getResumenCtaCte_x_nCuenta(numCuenta, periodo) {
 
         if (parseInt(numCuenta) > 9999) {
             let qFiltro = '';
+            let qFiltroPeriodo = '';
             let rs = await pool1.connect(); // Obtenemos la conexion     
             if (periodo != 'init') {
 
@@ -81,13 +84,15 @@ async function getResumenCtaCte_x_nCuenta(numCuenta, periodo) {
                     Select libro_idmovcaj from tb_liquidacion_detalle 
                     where num_cuentacte = ` + numCuenta + ` AND periodo = '` + periodo + `'
                 )`;
+                
 
             } else {
                 qFiltro = ` not in (
                     Select libro_idmovcaj from tb_liquidacion_detalle 
                     where num_cuentacte = ` + numCuenta + ` 
-                )  `;
+                )  `;                
 
+                qFiltroPeriodo = ' AND l.estado = 0 AND l.fecha > getdate() -35 ';
             }
 
             let qResumenCtaCte = `
@@ -117,6 +122,7 @@ async function getResumenCtaCte_x_nCuenta(numCuenta, periodo) {
                                 ) as tmp_prop_arrend on l.cod_propiedad = tmp_prop_arrend.codpropiedad
                             WHERE nulo IS NULL AND l.codigo = ` + numCuenta + ` /*AND isnull(monto,0) > 0	*/
                                 AND idmovcaj ` + qFiltro + ` AND isnull(l.cod_tipmovto,0) not in (6,7,11,17,18,19,22,23,30,41,24,25,26,27,39,40)
+                                ` + qFiltroPeriodo + `
 
                         ) as tmp_libro_arren_propiet
                             LEFT JOIN propiedad PRO on PRO.cod_propiedad = tmp_libro_arren_propiet.cod_propiedad
@@ -161,6 +167,7 @@ async function getGastosGlobales_numCuenta(numCuenta, periodo) {
     try {
         if (parseInt(numCuenta) > 9999) {
             let qFiltro = '';
+            let qFiltroPeriodo = '';
             let rs = await pool1.connect(); // Obtenemos la conexion     
             if (periodo != 'init') {
 
@@ -173,6 +180,8 @@ async function getGastosGlobales_numCuenta(numCuenta, periodo) {
                     Select libro_idmovcaj from tb_liquidacion_detalle 
                     where num_cuentacte = ` + numCuenta + ` 
                 ) `;
+
+                qFiltroPeriodo = ' AND l.estado = 0 AND l.fecha > getdate() -35 ';
             }
 
             let qGastos = `
@@ -202,7 +211,9 @@ async function getGastosGlobales_numCuenta(numCuenta, periodo) {
 
                         ) as tmp_prop_arrend on l.cod_propiedad = tmp_prop_arrend.codpropiedad
                     WHERE nulo IS NULL AND l.codigo = ` + numCuenta + ` AND isnull(monto,0) > 0	
-                        AND idmovcaj ` + qFiltro + ` AND tm.id_mov in (6,7,11,17,18,19,22,23,30,41,24,25,26,27,39,40)
+                        AND idmovcaj ` + qFiltro + ` AND tm.id_mov in (6,7,11,17,18,19,22,23,30,41,24,25,26,27,39,40)                        
+                        ${ qFiltroPeriodo }
+
                     UNION ALL
 
                     SELECT 	idmovcaj		
@@ -223,6 +234,7 @@ async function getGastosGlobales_numCuenta(numCuenta, periodo) {
                         AND idmovcaj ` + qFiltro + ` AND l.cod_tipmovto not in (6,7,11,17,18,19,22,23,30,41,24,25,26,27,39,40)
                         AND case when isnull(l.cod_arrendatario,0) = 0 then isnull(tmp_prop_arrend.codarrendatario,'0') else isnull(l.cod_arrendatario,0) end = '0'
                         AND isnull(l.cod_propiedad,'0') = '0'
+                        ${ qFiltroPeriodo }
 
                 ) as tmp_libro_arren_propiet
                     LEFT JOIN propiedad PRO on PRO.cod_propiedad = tmp_libro_arren_propiet.cod_propiedad
@@ -257,12 +269,50 @@ async function getGastosGlobales_numCuenta(numCuenta, periodo) {
     }
 }
 
+//Calculo saldos acumulados / saldos acumulados en contra
+async function getSaldoAcumulado_CuentaCorriente(xNumCuenta) {
+    try {
+
+        if (parseInt(xNumCuenta) > 9999) {
+
+            let qy = `
+                  
+            `;
+
+            let data = await pool1.query(qy);
+
+            return {
+                status: true,
+                message: 'Ejecución Correcta',
+                data: data.recordset
+            }
+
+        } else {
+
+            return {
+                status: false,
+                message: 'Parametros no válidos'
+            }
+        }
+
+    } catch (err) {
+
+        return {
+            status: false,
+            message: err.message
+        };
+
+    }
+
+}
+
 async function getDetalleMovimiento(numCuenta, periodo, cod) {
     try {
 
         if (parseInt(numCuenta) > 9999) {
             let qFiltro = '';
             let filtroArrenPropiedad = '';
+            let qFiltroPeriodo = '';
             let rs = await pool1.connect(); // Obtenemos la conexion     
             if (periodo != 'init') {
 
@@ -275,6 +325,8 @@ async function getDetalleMovimiento(numCuenta, periodo, cod) {
                     Select libro_idmovcaj from tb_liquidacion_detalle 
                     where num_cuentacte = ` + numCuenta + ` 
                 ) `;
+
+                qFiltroPeriodo = ' AND l.estado = 0 AND l.fecha > getdate() -35 ';
             }
 
             if(cod != '')
@@ -318,6 +370,7 @@ async function getDetalleMovimiento(numCuenta, periodo, cod) {
                             ) as tmp_prop_arrend on l.cod_propiedad = tmp_prop_arrend.codpropiedad
                         WHERE nulo IS NULL AND l.codigo = ` + numCuenta + ` /*AND isnull(monto,0) > 0	*/
                             AND idmovcaj ` + qFiltro + ` AND isnull(l.cod_tipmovto,0) not in (6,7,11,17,18,19,22,23,30,41,24,25,26,27,39,40,41)
+                            ${ qFiltroPeriodo }
                     ) as tmp_libro_arren_propiet
                     INNER JOIN tipo_documento td ON cod_tipdocto = td.idtipdoc
                     LEFT JOIN tipo_movimiento tm ON cod_tipmovto = tm.id_mov
@@ -326,8 +379,6 @@ async function getDetalleMovimiento(numCuenta, periodo, cod) {
                 ` + filtroArrenPropiedad + `
                 ORDER BY concat(PRO.direccion , ' ' , PRO.n_direccion , ' ' , PRO.unidad , ' ' , PRO.n_unidad),fchaFormat asc
             `;
-            
-            // console.log('qDetalle::',qDetalle);
 
             let data = await pool1.query(qDetalle);
 
@@ -442,7 +493,6 @@ async function getInfoPropietario(xncta)
     }
 }
 
-
 async function guardaInfoPdfCreado(xusr,xncta,xop,xnamefile)
 {
     try {   
@@ -482,7 +532,7 @@ async function infoOrdenAdministracion(xNumCuenta)
 {
     try {
 
-        if(xNumCuenta.trim() != '' && parseInt(xNumCuenta) > 9999 )
+        if(xNumCuenta != '' && parseInt(xNumCuenta) > 9999 )
         {
             let rs = await pool1.connect(); // Obtenemos la conexion     
 
@@ -534,7 +584,6 @@ async function infoOrdenAdministracion(xNumCuenta)
 
 }
 
-
 /**
  * Obtiene los movimientos de la cuenta corriente según el periodo enviado, para calculo de comisiones
  * Tipo Documentos : 
@@ -547,8 +596,9 @@ async function getInfoComision(numCuenta, periodo) {
 
         if (parseInt(numCuenta) > 9999) {
             let qFiltro = '';
+            let qFiltroPeriodo = '';
             let rs = await pool1.connect(); // Obtenemos la conexion     
-            if (periodo != 'init') {
+            if (periodo != 'init' && periodo != '') {
 
                 qFiltro = ` in (
                     Select libro_idmovcaj from tb_liquidacion_detalle 
@@ -559,6 +609,8 @@ async function getInfoComision(numCuenta, periodo) {
                     Select libro_idmovcaj from tb_liquidacion_detalle 
                     where num_cuentacte = ` + numCuenta + ` 
                 ) `;
+
+                qFiltroPeriodo = ' AND l.estado = 0 AND l.fecha > getdate() -35 ';
             }
 
             let qDetalle = `
@@ -600,6 +652,7 @@ async function getInfoComision(numCuenta, periodo) {
                             ) as tmp_prop_arrend on l.cod_propiedad = tmp_prop_arrend.codpropiedad
                         WHERE nulo IS NULL AND l.codigo = ` + numCuenta + ` /*AND isnull(monto,0) > 0	*/
                             AND idmovcaj ` + qFiltro + ` AND isnull(l.cod_tipmovto,0) in (1,3,4,14,15,42)
+                            ${ qFiltroPeriodo }
                     ) as tmp_libro_arren_propiet
                     INNER JOIN tipo_documento td ON cod_tipdocto = td.idtipdoc
                     LEFT JOIN tipo_movimiento tm ON cod_tipmovto = tm.id_mov
@@ -609,7 +662,6 @@ async function getInfoComision(numCuenta, periodo) {
                     case when GENERA = 'entrada' then monto else 0 end > 0                
             `;
 
-            // console.log('getInfoComision qDetalle::',qDetalle);
             let data = await pool1.query(qDetalle);
 
             return {
@@ -636,17 +688,124 @@ async function getInfoComision(numCuenta, periodo) {
     }
 }
 
+async function getComisionAsesoria(xNumCuenta) {
+    try {
+        if(parseInt(xNumCuenta) > 0) {
+            let rs = await pool1.connect(); // Obtenemos la conexion     
+            let q = `
+                Select nctacte,porcentaje_comision 
+                from tb_comision_asesorias where 
+                nctacte = ${xNumCuenta}
+            `;
+
+            let data = await pool1.query(q);
+
+            return {
+                status: true,
+                message: 'Ejecución Correcta',
+                data: data.recordset
+            }
+        }
+        else {
+
+            return {
+                status: false,
+                message: 'Parametros no válidos - getComisionAsesoria'
+            }
+        }        
+        
+    } catch (error) {
+        return {
+            status: false,
+            message: error.message
+        };
+    }
+}
+
+async function getTotalCargos_TotalAbonos(xNumCta,xPeriodo)
+{
+    try {
+
+        if(parseInt(xNumCta) > 0) {
+            let fCuenta = ` and codigo = ${xNumCta} `;
+            let fPeriodo = '';
+            if (xPeriodo != 'init' && xPeriodo != '') {
+
+                fPeriodo = ` and idmovcaj in (
+                    Select libro_idmovcaj from tb_liquidacion_detalle 
+                    where num_cuentacte = ${xNumCta} AND periodo = '` + xPeriodo + `'
+                )`;
+
+            } else {
+
+                fPeriodo = ` and idmovcaj not in (
+                    Select libro_idmovcaj from tb_liquidacion_detalle 
+                    where num_cuentacte = ${xNumCta} 
+                ) `;
+                
+            }
+
+            let rs = await pool1.connect(); // Obtenemos la conexion     
+            let q = `
+                Select codigo,sum(entrada) entr,sum(salida) sal
+                from(
+                    Select codigo,case when genera = 'entrada' then sum(isnull(monto,0)) else 0 end as entrada,
+                    case when genera = 'salida' then sum(isnull(monto,0)) else 0 end as salida
+                    from libro_ctacte 
+                    where estado = 0
+                        and isnull(nulo,'') = '' 
+                        and fecha > GETDATE() -35
+                        and cod_tipmovto not in (6,7,11,17,18,19,22,23,30,41,24,25,26,27,39,40)
+                        ${fCuenta}
+                        ${fPeriodo}
+                    group by genera,codigo
+                    ) tm
+                group by codigo            
+            `;
+
+            // console.log('qqqq::',q);
+            let data = await pool1.query(q);
+
+            return {
+                status: true,
+                message: 'Ejecución Correcta',
+                data: data.recordset
+            }
+        }
+        else 
+        {
+
+            return {
+                status: false,
+                message: 'Parametros no válidos'
+            }
+        }        
+        
+    } catch (error) {
+        return {
+            status: false,
+            message: error.message
+        };
+    }
+}
+
+
 /**
  * Calculo de comision de administración, de acuerdo a las reglas de las cuentas corrientes.
  * @param {Numero de la cuenta corriente} numCta 
  * @param {Periodo de la liquidación} periodo 
  */
 async function calculoComision(numCta, periodo) {
-    try {
-        
+    try {        
         const dOrdenAdmin = await infoOrdenAdministracion(numCta);
         const dComision = await getInfoComision(numCta,periodo);
         const propSanCamilo = await getPropiedadesArrendadasXSanCamilo();
+        const porcentComisionAsesoria = await getComisionAsesoria(numCta);
+
+        //console.log('porcentComisionAsesoria::',porcentComisionAsesoria);
+        // porcentComisionAsesoria:: { status: true,
+        //     message: 'Ejecución Correcta',
+        //     data: [ { nctacte: 10311, porcentaje_comision: 5 } ] }
 
         let codPropiedadSanCamilo = [];
         if(parseInt(numCta) == 10203) {
@@ -661,10 +820,10 @@ async function calculoComision(numCta, periodo) {
         }
 
         let totalComision = 0;
+        let totalComisionAsesoria = 0;
         let calcComision = 0;
         let totalCargos = 0;
         let porcentComision = 0;
-
         let resultOAD = null;
 
         if(dOrdenAdmin.status) {
@@ -675,7 +834,7 @@ async function calculoComision(numCta, periodo) {
                 porcentComision = parseInt(resultOAD[i].porcentaje_comision);
             }
             
-            if(dComision.status) {
+            if(dComision.status) {                
                 
                 for (let i = 0; i < dComision.data.length; i++) {
 
@@ -687,6 +846,7 @@ async function calculoComision(numCta, periodo) {
                             dComision.data[i].id_mov == 4 || 
                             dComision.data[i].id_mov == 14 || 
                             dComision.data[i].id_mov == 15 ||
+                            dComision.data[i].id_mov == 43 || 
                             dComision.data[i].id_mov == 42
                             ) {
                             calcComision += parseInt(dComision.data[i].ABONO);
@@ -704,6 +864,7 @@ async function calculoComision(numCta, periodo) {
                                 dComision.data[i].id_mov == 3 || 
                                 dComision.data[i].id_mov == 14 || 
                                 dComision.data[i].id_mov == 15 ||
+                                dComision.data[i].id_mov == 43 || 
                                 dComision.data[i].id_mov == 42 ) {
 
                                 /**VERIFICAMOS QUE LA PROPIEDAD NO SEA ARRENDADA POR SAN CAMILO...  */
@@ -724,12 +885,19 @@ async function calculoComision(numCta, periodo) {
                             dComision.data[i].id_mov == 3 || 
                             dComision.data[i].id_mov == 14 || 
                             dComision.data[i].id_mov == 15 || 
+                            dComision.data[i].id_mov == 43 || 
                             dComision.data[i].id_mov == 42 ) {
 
                             calcComision += parseInt(dComision.data[i].ABONO);
                             totalCargos += parseInt(dComision.data[i].CARGO);
                         }
                     }
+                }
+
+
+
+                if(parseInt(porcentComisionAsesoria.data.length) > 0) {
+                    totalComisionAsesoria = ((parseInt(porcentComisionAsesoria.data[0].porcentaje_comision) / 100) * (calcComision - totalCargos)).toFixed(0);
                 }
 
                 //Calculamos el porcentaje de Comision
@@ -740,12 +908,21 @@ async function calculoComision(numCta, periodo) {
             
             }
         }
-    
+
+        let porcentComiAsesoria = 0;
+
+        
+        if(porcentComisionAsesoria.data.length > 0) {
+            porcentComiAsesoria = porcentComisionAsesoria.data[0].porcentaje_comision;
+        }
+        
         return {
             status : true,
             resultOAD,
             totalComision,
-            porcentComision
+            porcentComision,
+            totalcomisionasesoria: totalComisionAsesoria,
+            porcentComiAsesoria
         }
 
     } catch (error) {
@@ -803,8 +980,11 @@ async function comisiones_por_ctacte_periodoactual(xncuenta,periodo) {
         let rs = await pool1.connect(); // Obtenemos la conexion
         let filter = '';
         let filPeriodo = '';
+        let qFiltroPeriodo = '';
+        let fctacte = '';
         if(xncuenta !== 0) {
-            filter = `  AND l.codigo = ${ xncuenta } `;
+            filter = ` AND l.codigo = ${ xncuenta } `;
+            fctacte = ` AND NCtaCte = ${ xncuenta } `;
         }
         
         if(periodo != 'init' && periodo != '') {
@@ -822,21 +1002,25 @@ async function comisiones_por_ctacte_periodoactual(xncuenta,periodo) {
                     Select libro_idmovcaj from tb_liquidacion_detalle                    
                 )  
             `;
+
+            qFiltroPeriodo = ' AND l.estado = 0 AND l.fecha > getdate() -35';
         }
 
         let qy = `
-            SELECT codigo
-                ,SUM(CARGO) as TOTALCARGO
-                ,SUM(ABONO) as TOTALABONO
-                ,SUM(ISNULL(ABONO,0)) - SUM(ISNULL(CARGO,0)) as montoaliq
+            SELECT NCtaCte codigo
+                --,SUM(isnull(CARGO,0)) as TOTALCARGO
+                --,SUM(isnull(ABONO,0)) as TOTALABONO
+                ,SUM(isnull(CARGO,0)) + sal as TOTALCARGO
+                ,SUM(isnull(ABONO,0)) + ent as TOTALABONO
+                ,(SUM(ISNULL(ABONO,0) ) + ent) - (SUM(ISNULL(CARGO,0) )  + sal) as montoaliq
                 ,ISNULL(comision_admin.por_comision,0) as comi_admin
                 ,ISNULL(CAST(
-                    (comision_admin.por_comision * ( SUM(ABONO) -SUM(CARGO)) /100) + (19 * (comision_admin.por_comision * ( SUM(ABONO) -SUM(CARGO)) /100) /100)
+                    (comision_admin.por_comision * ( SUM(ISNULL(ABONO,0)) -SUM(isnull(CARGO,0))) /100) + (19 * (comision_admin.por_comision * ( SUM(ISNULL(ABONO,0)) -SUM(isnull(CARGO,0))) /100) /100)
                 as decimal(18,0)),0) as total_comi_adm
                 , isnull(porcentaje_comision,0) as comi_asesor
                 ,ISNULL(CAST(CASE WHEN isnull(porcentaje_comision,0) != 0
                         THEN
-                            (porcentaje_comision * ( SUM(ABONO) -SUM(CARGO)) /100)
+                            (porcentaje_comision * ( SUM(ISNULL(ABONO,0)) -SUM(isnull(CARGO,0))) /100)
                         ELSE 0 END as decimal(18,0)),0) AS total_comi_asesor
             
             FROM (
@@ -857,12 +1041,10 @@ async function comisiones_por_ctacte_periodoactual(xncuenta,periodo) {
                             ,l.n_recibo as numRecibo
                             ,l.cod_tipdocto,l.cod_tipmovto
                         FROM libro_ctacte l
-                        WHERE nulo IS NULL 
-                            /* AND l.fecha > getdate() -40 */
-                            
+                        WHERE nulo IS NULL                             
+                            ${ qFiltroPeriodo }
                             ${ filPeriodo }
-
-                            AND isnull(l.cod_tipmovto,0) in (1,3,4,14,15,42)
+                            AND isnull(l.cod_tipmovto,0) in (1,3,14,15,42,43)
                             AND l.cod_propiedad not in (
                                 /*PROPIEDADES SAN CAMILO*/
                                 Select pro.cod_propiedad
@@ -883,7 +1065,7 @@ async function comisiones_por_ctacte_periodoactual(xncuenta,periodo) {
                     case when GENERA = 'entrada' then monto else 0 end > 0
             
             ) as DP
-            left join (
+            right join (
             
                 Select NCtaCte,fc_contrato,por_comision,dialiq
                 from(
@@ -911,12 +1093,37 @@ async function comisiones_por_ctacte_periodoactual(xncuenta,periodo) {
                                 where nulo = 'NO'
                     ) oaa on oa.NCtaCte = oaa.NCtaCte
                 ) as tmp
+                where isnull(NCtaCte,0) != 0
+                ${fctacte}
             )as comision_admin on DP.codigo = comision_admin.NCtaCte
-            left join tb_comision_asesorias on NCtaCte = nctacte
-            where codigo is not null
-            GROUP BY codigo,comision_admin.por_comision,porcentaje_comision
+            left join tb_comision_asesorias on comision_admin.NCtaCte= nctacte
+            left join (
+				Select codigo,sum(ent) ent, sum(sal)sal
+				from(
+					SELECT  
+						--, idmovcaj, l.cod_propiedad, convert(varchar(10),l.fecha,105) as FECHA,l.fecha as fchaFormat,l.glosa,l.n_recibo as numRecibo,l.cod_tipdocto,l.cod_tipmovto
+						l.codigo
+						,CASE WHEN l.genera = 'entrada' THEN SUM(ISNULL(monto,0)) ELSE 0 END as ent		
+						,CASE WHEN l.genera = 'salida' THEN SUM(ISNULL(monto,0)) ELSE 0 END as sal
+					FROM libro_ctacte l
+					WHERE nulo IS NULL
+							AND l.estado = 0 AND l.fecha > getdate() -35
+						AND idmovcaj not in (
+							Select libro_idmovcaj from tb_liquidacion_detalle
+						)
+						AND isnull(l.cod_tipmovto,0)not in (1,3,14,15,42,43,38,39,6)
+						${filter}	
+						GROUP BY l.codigo,l.genera
+				) tmps
+				GROUP BY codigo
+			) otrosDescuentos on otrosDescuentos.codigo = comision_admin.NCtaCte
+
+            where NCtaCte is not null
+            GROUP BY NCtaCte,comision_admin.por_comision,porcentaje_comision,sal,ent
+            ORDER BY NCtaCte
         `;
                             
+        // console.log('qy:::',qy);
         let data = await pool1.query(qy);
 
         return {
@@ -971,6 +1178,11 @@ async function getCtacte_Config_AcumSaldo(xNumCuenta)
     }
 }
 
+/**
+ * Guarda opcion para acumular saldo en cuenta corriente.
+ * @param {*} req 
+ * @param {*} res 
+ */
 async function saveConfigSaldoAcum(req,res)
 {
     try {
@@ -1041,6 +1253,397 @@ async function saveConfigSaldoAcum(req,res)
 }
 
 
+/**
+ * ####################################################################
+ * 
+ *  COMPROBANTES CARGOS / ABONOS
+ * 
+ * ####################################################################
+ */
+///  CARGOS
+async function saveCargos(xNumCuenta,xMonto,xCodMovto,xGlosa ) {
+    try {
+           
+        moment.locale('es');
+        let val = numpalabra(xMonto.toString());
+        let montoPalabra = val.toUpperCase()+' PESOS';
+        let fechaNow = moment().format('YYYY-MM-DD');
+        let horaNow = moment().format('HH:mm:ss');        
+        
+        let nombreCuentaCorriente = await getInfoPropietario(xNumCuenta);        
+        let nombreCuenta = nombreCuentaCorriente.nombrePropietario;        
+        
+        let pool2 = await mssql.connect(database);
+        let result2 = await pool2.request()
+            .input('codigo', mssql.Int, xNumCuenta)
+            .input('cod_propiedad', mssql.VarChar(50), '')
+            .input('cod_movto', mssql.Int, xCodMovto)
+            .input('paguesea', mssql.VarChar(150), nombreCuenta)
+            .input('monto', mssql.Int, xMonto)
+            .input('glosa', mssql.VarChar(500), xGlosa)
+            .input('hecho_x', mssql.VarChar(50), 'Administrador')
+            .input('autor', mssql.VarChar(50), '')
+            .input('fecha', mssql.DateTime, fechaNow)
+            .input('impreso', mssql.VarChar(50), 'SI')
+            .input('saldoctacte', mssql.VarChar(50), '')
+            .input('mon_palabras', mssql.VarChar(100), montoPalabra)
+            .input('id_usuario', mssql.Int, 77)
+            .input('fecha_user', mssql.DateTime, fechaNow)
+            .input('hora_user', mssql.VarChar(50),horaNow )
+            .input('accion_usuario', mssql.VarChar(50), 'ins')
+        .execute('CargoCtaCte_Guardar')
+
+        let nReg = result2.recordset[0].NREG;
+        let respp = await updateCodBar_CargoxLiquidacion(nReg);        
+
+        return {
+            status:true,
+            message : 'Ejecucion correcta',
+            idcargo : nReg
+        }
+
+    } catch (error) {
+
+        return {
+            status:false,
+            message : error.message
+        }
+        
+    }
+}
+
+async function updateCodBar_CargoxLiquidacion(xIdCod) {
+    try {
+        
+        if(parseInt(xIdCod) !== 0) 
+        {
+            let rs = await pool1.connect(); // Obtenemos la conexion
+            let codbar = `C${xIdCod}C`;
+            let queryAc = `
+                    UPDATE comp_cargos 
+                    SET cdbar = '${codbar}'
+                    WHERE idcargo = ${xIdCod};
+                `;
+
+            let respAcum = await pool1.query(queryAc);
+
+            return {
+                status: true,
+                message: 'Ejecución Correcta'
+            }
+
+        } else {
+
+            return {
+                status :false,
+                message : 'Parámetros no válidos!'
+            }
+
+        }
+
+    } catch (error) {
+
+        return {
+            status :false,
+            message : error.message
+        }
+        
+    }
+}
+
+async function getCargos(idCargo) {
+    try {
+        
+        if(parseInt(idCargo) !== 0) 
+        {
+            let rs = await pool1.connect(); // Obtenemos la conexion
+            
+            let queryAc = `
+                    Select * from comp_cargos                     
+                    WHERE idcargo = ${idCargo};
+                `;
+
+            let resp = await pool1.query(queryAc);
+
+            return {
+                status: true,
+                message: 'Ejecución Correcta',
+                data:resp.recordset
+            }
+
+        } else {
+
+            return {
+                status :false,
+                message : 'Parámetros no válidos!'
+            }
+
+        }
+
+
+    } catch (error) {
+
+        return {
+            status : false,
+            message: error.message
+        }
+    }
+}
+
+
+///  ABONOS
+/**
+ * Guarda abonos
+ * @param {*} xNumCuenta 
+ * @param {*} xMonto 
+ * @param {*} xCodMovto 
+ * @param {*} xGlosa 
+ */
+async function saveAbonos(xNumCuenta,xMonto,xCodMovto,xGlosa ) {
+    try {
+
+        moment.locale('es');
+        let val = numpalabra(xMonto.toString());
+        let montoPalabra = val.toUpperCase()+' PESOS';
+        let dia = moment().format('DD');
+        let Anoi = moment().format('YYYY');
+        let mes = moment().format('MM');
+        let hora = moment().format('HH');
+        let min = moment().format('mm');
+        let seg = moment().format('ss');
+
+        let nombreCuentaCorriente = await getInfoPropietario(xNumCuenta);
+        let nombreCuenta = nombreCuentaCorriente.nombrePropietario;
+        
+        let rs = await pool1.connect(); // Obtenemos la conexion        
+        let queryAc = `
+                insert comp_abonos(codigo,cod_propiedad,cod_movto,recibide,monto,glosa,hechox,autorizadox
+                    ,fecha,impreso,saldo_ctacte,mon_palabras ,id_usuario,fecha_user,hora_user,accion_usuario)
+                values
+                (
+                    ${xNumCuenta},'',${xCodMovto}
+                    ,'${nombreCuenta}',${xMonto},'${xGlosa}','Administrador',''
+                    ,'${Anoi}-${mes}-${dia}','SI','','${montoPalabra}'
+                    ,77                    
+                    ,'${Anoi}-${mes}-${dia}'
+                    ,'${hora}:${min}:${seg}'                    
+                    ,'ins'
+                );
+
+                SELECT SCOPE_IDENTITY() AS NREG                    
+            `;
+
+        let respAcum = await pool1.query(queryAc.toString());            
+
+        // let pool2 = await mssql.connect(database);
+        // let result2 = await pool2.request()
+        //     .input('codigo', mssql.Int, xNumCuenta)
+        //     .input('cod_propiedad', mssql.VarChar(50), '')
+        //     .input('cod_movto', mssql.Int, xCodMovto)
+        //     .input('recibide', mssql.VarChar(100), nombreCuenta)
+        //     .input('monto', mssql.Int, xMonto)
+        //     .input('glosa', mssql.VarChar(500), xGlosa)
+        //     .input('hechox', mssql.VarChar(50), 'Administrador')
+        //     .input('autorizadox', mssql.VarChar(50), '')
+        //     .input('impreso', mssql.VarChar(50), 'SI')
+        //     .input('saldoctacte', mssql.VarChar(50), '')
+        //     .input('mon_palabras', mssql.VarChar(500), montoPalabra)
+        //     .input('id_usuario', mssql.Int, 77)
+        // .execute('m_AbonoCtaCte_Guardar');
+
+        let nReg = respAcum.recordset[0].NREG;
+        let respp = await updateCodBar_Abono(nReg);
+
+        return {
+            status:true,
+            message : 'Ejecucion correcta',
+            idabono : nReg
+        }
+
+    } catch (error) {
+
+        return {
+            status:false,
+            message : 'Error Abono ' + error.message
+        }
+        
+    }
+}
+
+async function updateCodBar_Abono(xIdCod) {
+    try {
+        
+        if(parseInt(xIdCod) !== 0) 
+        {
+            let rs = await pool1.connect(); // Obtenemos la conexion
+            let codbar = `A${xIdCod}C`;
+            let queryAc = `
+                    UPDATE comp_abonos 
+                    SET cdbar = '${codbar}'
+                    WHERE idabono = ${xIdCod};
+                `;
+
+            let respAcum = await pool1.query(queryAc);
+
+            return {
+                status: true,
+                message: 'Ejecución Correcta'
+            }
+
+        } else {
+
+            return {
+                status :false,
+                message : 'Parámetros no válidos!'
+            }
+
+        }
+
+    } catch (error) {
+
+        return {
+            status :false,
+            message : error.message
+        }
+        
+    }
+}
+
+/**
+ * Obtiene abono
+ * @param {*} idAbono 
+ */
+async function getAbono(idAbono) {
+    try {
+        
+        if(parseInt(idAbono) !== 0) 
+        {
+            let rs = await pool1.connect(); // Obtenemos la conexion
+            
+            let queryAc = `
+                    Select * from comp_abonos                     
+                    WHERE idabono = ${idAbono};
+                `;
+
+            let resp = await pool1.query(queryAc);
+
+            return {
+                status: true,
+                message: 'Ejecución Correcta',
+                data:resp.recordset
+            }
+
+        } else {
+
+            return {
+                status :false,
+                message : 'Parámetros no válidos!'
+            }
+
+        }
+
+    } catch (error) {
+
+        return {
+            status : false,
+            message: error.message
+        }
+    }
+}
+
+async function verificaAcumulaSaldo(xNumCta) {
+    try {
+        
+        if(parseInt(xNumCta) !== 0) 
+        {
+            let rs = await pool1.connect(); // Obtenemos la conexion
+            
+            let queryAc = `
+                    Select num_ctacte,acumula_saldo
+                    from tb_config_cartola_ctacte
+                    where num_ctacte = ${xNumCta}
+                `;
+
+            let resp = await pool1.query(queryAc);
+            let acumSaldo = false;
+            
+            if( resp.recordset.length > 0 && 
+                resp.recordset[0].acumula_saldo) {
+
+                acumSaldo = true;
+                // console.log('resp Acumula saldo::',resp);
+            }
+
+            return {
+                status: true,
+                message: 'Ejecución Correcta',
+                acumulaSaldo:acumSaldo
+            }
+
+        } else {
+
+            return {
+                status :false,
+                message : 'Parámetros no válidos!'
+            }
+
+        }
+
+    } catch (error) {
+
+        return {
+            status : false,
+            message: error.message
+        }
+    }    
+}
+
+/**
+ * Monto acumulado, ya sea a favor o en contra.
+ * @param {*} xNumCta 
+ */
+async function getMontoAcumulado_EnContra_Favor(xNumCta) {
+    try {
+        
+        if(parseInt(xNumCta) !== 0) 
+        {
+            let rs = await pool1.connect(); // Obtenemos la conexion            
+            let queryAc = `
+                    Select top 2 cod_tipmovto as cod,nom_mov as nomMov,monto 
+                    from libro_ctacte 
+                    left join tipo_movimiento on cod_tipmovto = id_mov
+                    where codigo = ${xNumCta}
+                        and cod_tipmovto in(38,37)
+                        and estado = 0                        
+                        and fecha > GETDATE() -50
+                    order by fecha desc
+                `;
+
+            let resp = await pool1.query(queryAc);            
+            return {
+                status: true,
+                message: 'Ejecución Correcta',
+                acumulaSaldo:resp.recordset
+            }
+
+        } else {
+
+            return {
+                status :false,
+                message : 'Parámetros no válidos!'
+            }
+
+        }
+
+    } catch (error) {
+
+        return {
+            status : false,
+            message: error.message
+        }
+    }
+}
+
 module.exports = {
     getListado_CtaCte,
     getResumenCtaCte_x_nCuenta,
@@ -1056,6 +1659,12 @@ module.exports = {
     getPropiedadesArrendadasXSanCamilo,
     comisiones_por_ctacte_periodoactual,
     getCtacte_Config_AcumSaldo,
-    saveConfigSaldoAcum
-
+    saveConfigSaldoAcum,
+    saveCargos,
+    getCargos,
+    saveAbonos,
+    getAbono,
+    verificaAcumulaSaldo,
+    getMontoAcumulado_EnContra_Favor,
+    getTotalCargos_TotalAbonos
 }
