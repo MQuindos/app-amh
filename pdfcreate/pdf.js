@@ -737,17 +737,13 @@ async function getData(numCuenta,xPeriodo) {
         let xdataGB = await liquidacion.getGastosGlobales_numCuenta(numCuenta,xPeriodo);
         //let dataGBFormat = await formatGastosGlobales(xdataGB.data);
         let dataGBFormat = await liquidacion.calculoComision(numCuenta,''); 
-
         let xdataRes = await liquidacion.getResumenCtaCte_x_nCuenta(numCuenta,xPeriodo);
-
         let xdataDetalle =  await liquidacion.getDetalleMovimiento(numCuenta,xPeriodo,'');
-        // console.log(xdataDetalle.data);
-        let dataDetalleFormat = await formatDetalle(xdataDetalle.data);
-        
+        let dataDetalleFormat = await formatDetalle(xdataDetalle.data);        
         let sumaCargosAbonos = await liquidacion.getTotalCargos_TotalAbonos(numCuenta,'');
-        let calculoComision = await liquidacion.calculoComision(numCuenta,'');
-        let montoComisionAdmin = calculoComision.totalComision;
-        let montoComisionAsesoria = calculoComision.totalcomisionasesoria;
+
+        let montoComisionAdmin = dataGBFormat.totalComision;
+        let montoComisionAsesoria = dataGBFormat.totalcomisionasesoria;
         let totalCargosMenosAbonos = parseInt(sumaCargosAbonos.data[0].entr) - parseInt(sumaCargosAbonos.data[0].sal);
 
         let montoaliquidar = parseInt(totalCargosMenosAbonos - montoComisionAdmin - montoComisionAsesoria);
@@ -755,6 +751,8 @@ async function getData(numCuenta,xPeriodo) {
         resultComision.push({ 'id_mov':6,'MOV':'Comisión Administración','MONTO':dataGBFormat.totalComision  });
         resultComision.push({ 'id_mov':41,'MOV':'Comisión Asesoria','MONTO':dataGBFormat.totalcomisionasesoria  });
         resultComision.push({ 'id_mov':17,'MOV':'Liquidación','MONTO':montoaliquidar });
+        resultComision.push({ 'id_mov':999,'MOV':'abonototal','MONTO':sumaCargosAbonos.data[0].entr });
+        resultComision.push({ 'id_mov':998,'MOV':'cargototal','MONTO':sumaCargosAbonos.data[0].sal });
         
 
         return {
@@ -912,9 +910,16 @@ async function createPDF(numCuenta, xPeriodo , xnombreUsuario) {
     }
 }
 
+async function getInfoComisionesPorCuenta(xDiaLiq) {
+
+    
+
+}
+
 module.exports = { 
     createPDF,
     createPDFMovimientoCaja,
     createComprobanteCargoLiquidacion,
-    creaComprobanteCargoLiquidacion_ComisionAdmin
+    creaComprobanteCargoLiquidacion_ComisionAdmin,
+    getData
 };

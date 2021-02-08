@@ -33,8 +33,8 @@
                         <select class="selectpicker" id="sl_dialiquidacion" data-live-search="true" data-width="80%" data-size="5" >
                                 <option value="init"> - - Selecciona - - </option>                                
                                 <option data-tokens="10" value="10">Dia 10</option>
-                                <option data-tokens="10" value="10">Dia 15</option>
-                                <option data-tokens="10" value="10">Dia 30</option>
+                                <option data-tokens="15" value="15">Dia 15</option>
+                                <option data-tokens="30" value="30">Dia 30</option>
                         </select>
                   </div>    
                   <div class="col-1">
@@ -66,13 +66,13 @@
                                     <th class="titulos" scope="col">Total Abonos</th>
                                     <th class="titulos" scope="col">Total Cargos</th>
                                     <th class="titulos" scope="col">Total</th>                                    
-                                    <th class="titulos" scope="col">% Comisión</th>
-                                    <th class="titulos" scope="col">Total Comisión</th>
+                                    <th class="titulos" scope="col">% Admin.</th>
+                                    <th class="titulos" scope="col">Comisión Admin.</th>
                                     <th class="titulos" scope="col">% Asesoría</th>
                                     <th class="titulos" scope="col">Monto Asesoría</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="tbInfoLiquidacion">
                                 {{!-- {{#each data}}
                                 <tr>
                                     <td> {{ incremented @index }}</td>
@@ -122,3 +122,4 @@
     <hr>
 
 </div>
+<script src="../javascripts/comision.js"></script>

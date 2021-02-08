@@ -161,32 +161,6 @@ router.post('/liquidacion/getResumenCta', async(req, res) => {
 });
 
 
-
-// router.get('/liquidacion/getDetalleAbono',async(req,res) => {
-
-//     let { idlib } = req.query;
-//     let resp = await liquidacionController.getDetalleAbono(idlib);
-
-//     // console.log(resp);
-
-//     if(resp.status)
-//     {
-//         return res.json({
-//             status : true,
-//             data: resp.data
-//         });
-//     }
-//     else {
-
-//         return res.json({
-//             status : false,
-//             message : resp.message
-//         });
-//     }    
-
-// });
-
-
 router.get('/liquidacion/getFilePdf', async(req, res) => {
 
     try {
@@ -215,9 +189,7 @@ router.get('/liquidacion/getFilePdf', async(req, res) => {
             message:error.message
         });
         
-        
-    }
-    
+    }    
 
 });
 
@@ -267,7 +239,7 @@ router.get('/liquidacion/getComprobanteLiqCargo', async(req, res) => {
 router.get('/liquidacion/comisionCtaCte',async(req,res) => {
     ssn = req.session;
     //let respDetalle = await liquidacionController.comisiones_por_ctacte_periodoactual(0,'init');
-    
+
     return res.render('liquidaciones/comisionctas', {
         name_user: ssn.nombre,
         nombrelog: 'ssd',
@@ -277,16 +249,10 @@ router.get('/liquidacion/comisionCtaCte',async(req,res) => {
 });
 
 router.get('/liquidacion/comisionCtaCtePorDiaLiquidacion',async(req,res) => {
-    ssn = req.session;
-    let {xfecha} = req.query;
-    let respDetalle = await liquidacionController.comisiones_por_ctacte_periodoactual(0,'init');
-    
-    return res.render('liquidaciones/comisionctas', {
-        name_user: ssn.nombre,
-        nombrelog: 'ssd',
-        //data:respDetalle.data
-    });
+
+    return await liquidacionController.getDataVista_ComisionPorCuenta(req,res);
 
 });
+
 
 module.exports = router;

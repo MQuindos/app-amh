@@ -16,6 +16,7 @@ const authRouter = require('./routes/auth');
 const amhRouter = require('./routes/amh');
 const liquidacionRouter = require('./routes/liquidacion');
 const initRouter = require('./routes/desktop');
+const cartolaRouter = require('./routes/cartola');
 
 var upload = multer({
     dest: __dirname + '/public/upload/'
@@ -63,6 +64,7 @@ app.use(authentication);
 app.use(initRouter);
 app.use(amhRouter);
 app.use(liquidacionRouter);
+app.use(cartolaRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

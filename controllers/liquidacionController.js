@@ -5,6 +5,9 @@ const database = require('../keys');
 const numpalabra = require('./numPalabra');
 const moment = require('moment');
 const pool1 = new mssql.ConnectionPool(database);
+var session = require('express-session');
+
+var ssn;
 
 /**
  * OBTIENE EL LISTADO DE CUENTAS CORRIENTES
@@ -615,21 +618,11 @@ async function getInfoComision(numCuenta, periodo) {
 
             let qDetalle = `
                 SELECT TIPO, FECHA
-                    /*,   concat(PRO.direccion , ' ' , PRO.n_direccion , ' ' , PRO.unidad , ' ' , PRO.n_unidad) as PROPIEDAD
-                    ,   tmp_libro_arren_propiet.codigo as [N° CUENTA]*/
-                    /*, ISNULL(tm.nom_mov,'') as DESCRIPCION                         
-                    ,   CASE WHEN ISNULL(tm.nom_mov,'') = '' THEN td.nom_doc ELSE ISNULL(tm.nom_mov,'')END as DESCRIPCION */
                     ,   tm.id_mov
                     ,   case when GENERA = 'salida' then monto else 0 end as CARGO
                     ,   case when GENERA = 'entrada' then monto else 0 end as ABONO
                     ,   PRO.cod_propiedad
-                    /*,   
-                    ,   ARREN.cod_arrendatario
-                    ,   glosa
-                    ,   idmovcaj
-                    ,   numRecibo
-                    ,   fchaFormat
-                    ,   CONCAT(tmp_libro_arren_propiet.cod_arrendatario,'-',tmp_libro_arren_propiet.cod_propiedad) as COD */
+                
                 FROM
                     (
                         SELECT  DISTINCT 'COMISION' as  TIPO, idmovcaj
@@ -747,7 +740,7 @@ async function getTotalCargos_TotalAbonos(xNumCta,xPeriodo)
 
             let rs = await pool1.connect(); // Obtenemos la conexion     
             let q = `
-                Select codigo,sum(entrada) entr,sum(salida) sal
+                Select top 1 codigo,sum(entrada) entr,sum(salida) sal
                 from(
                     Select codigo,case when genera = 'entrada' then sum(isnull(monto,0)) else 0 end as entrada,
                     case when genera = 'salida' then sum(isnull(monto,0)) else 0 end as salida
@@ -761,9 +754,10 @@ async function getTotalCargos_TotalAbonos(xNumCta,xPeriodo)
                     group by genera,codigo
                     ) tm
                 group by codigo            
+                union all 
+                Select ${xNumCta} as codigo,0 entr,0 sal
             `;
 
-            // console.log('qqqq::',q);
             let data = await pool1.query(q);
 
             return {
@@ -799,16 +793,12 @@ async function calculoComision(numCta, periodo) {
     try {        
         const dOrdenAdmin = await infoOrdenAdministracion(numCta);
         const dComision = await getInfoComision(numCta,periodo);
-        const propSanCamilo = await getPropiedadesArrendadasXSanCamilo();
+        let propSanCamilo;
         const porcentComisionAsesoria = await getComisionAsesoria(numCta);
-
-        //console.log('porcentComisionAsesoria::',porcentComisionAsesoria);
-        // porcentComisionAsesoria:: { status: true,
-        //     message: 'Ejecución Correcta',
-        //     data: [ { nctacte: 10311, porcentaje_comision: 5 } ] }
 
         let codPropiedadSanCamilo = [];
         if(parseInt(numCta) == 10203) {
+            propSanCamilo = await getPropiedadesArrendadasXSanCamilo();
 
             if(propSanCamilo.status) {
 
@@ -894,8 +884,6 @@ async function calculoComision(numCta, periodo) {
                     }
                 }
 
-
-
                 if(parseInt(porcentComisionAsesoria.data.length) > 0) {
                     totalComisionAsesoria = ((parseInt(porcentComisionAsesoria.data[0].porcentaje_comision) / 100) * (calcComision - totalCargos)).toFixed(0);
                 }
@@ -909,9 +897,7 @@ async function calculoComision(numCta, periodo) {
             }
         }
 
-        let porcentComiAsesoria = 0;
-
-        
+        let porcentComiAsesoria = 0;        
         if(porcentComisionAsesoria.data.length > 0) {
             porcentComiAsesoria = porcentComisionAsesoria.data[0].porcentaje_comision;
         }
@@ -1250,6 +1236,219 @@ async function saveConfigSaldoAcum(req,res)
         }) ;
         
     }
+}
+
+
+async function getInfoCtaCte(xnumcta,xDiaLiq) {
+    try {
+
+        let filter = '';
+        let filterDia = '';
+        if(parseInt(xnumcta) > 0) {
+            filter = ` and oad.nctacte = ${xnumcta}`;
+        }
+
+        if(xDiaLiq != 0) {
+            filterDia = ` and dia_liq = ${xDiaLiq} `;
+        }
+
+        let rs = await pool1.connect(); // Obtenemos la conexion
+        
+        let qy = `
+            Select oad.nctacte as numcta
+                ,cod_propietario
+                ,isnull(id_ejecutiva,0) idejectiva
+                ,isnull(nom_ejecutiva,'') as nomejecuti
+                ,oad.porcentaje_comision as comi_admin
+                ,dia_liq 
+                ,duracion_contrato
+                ,isnull(tb_asesoria.porcentaje_comision,0) as comi_asesoria
+            from [udf_UltimaOrdenAnexoAdmTabla](0) oad 
+            left join tb_comision_asesorias tb_asesoria on oad.nctacte = tb_asesoria.nctacte
+            where isnull(oad.nctacte,'') != '' 
+            ${filter}
+                ${filterDia}
+            order by oad.nctacte         
+        `;
+
+
+     /*   let qy = `
+                Select id_anexo_contadm,cod_propietario
+                    ,fecha_contrato
+                    ,daod.NCtaCte as numcta
+                    ,isnull(ej.nom_real,'') as nomejecuti
+                    ,duracion_contrato
+                    ,por_comi as comi_admin
+                    ,isnull(porcentaje_comision,0) as comi_asesoria
+                    ,dia_liq
+                from OrdenAdministracionAnexo oaa
+                    left join Detalle_AnexoOrdAdm_CtaCte daod on oaa.id_anexo_contadm = daod.Id_AnexoOrdAdm
+                    inner join(
+                        Select max(id_anexo_contadm) id,daod.NCtaCte
+                        from OrdenAdministracionAnexo oaa
+                            left join Detalle_AnexoOrdAdm_CtaCte daod on oaa.id_anexo_contadm = daod.Id_AnexoOrdAdm
+                        where nulo = 'NO'
+                        group by daod.NCtaCte
+                    ) tmp on tmp.id = id_anexo_contadm and tmp.NCtaCte = daod.NCtaCte
+                    left join (
+                        Select * from ejecutiva where estado_ej ='activo'
+                    ) ej on id_ejecutiva = ej.cod_ejecutiva
+                    left join tb_comision_asesorias on daod.NCtaCte = nctacte
+                where nulo = 'NO'
+                ${filter}
+                ${filterDia}
+                order by daod.NCtaCte
+        `;
+        */
+// console.log('qy::',qy);
+        let data = await pool1.query(qy);
+
+        return {
+            status :true,
+            message : 'Correcto',
+            data : data.recordset
+        }
+
+    } catch (error) {
+        return {
+            status :false,
+            message : error.message
+        }
+    }
+}
+
+async function preparamosInfo_VistaComisionPorCuenta(numCuenta)
+{
+    try {
+        let resultComision = [];
+        let dataGBFormat = await calculoComision(numCuenta,''); 
+        let sumaCargosAbonos = await getTotalCargos_TotalAbonos(numCuenta,'');      
+
+        let totalCargosMenosAbonos = parseInt(sumaCargosAbonos.data[0].entr) - parseInt(sumaCargosAbonos.data[0].sal);
+        let montoComisionAdmin = dataGBFormat.totalComision;
+        let montoComisionAsesoria = dataGBFormat.totalcomisionasesoria;
+
+        let montoaliquidar = parseInt(totalCargosMenosAbonos - montoComisionAdmin - montoComisionAsesoria);
+
+        resultComision.push({ 'id_mov':6,'MOV':'Comisión Administración','MONTO':dataGBFormat.totalComision  });
+        resultComision.push({ 'id_mov':41,'MOV':'Comisión Asesoria','MONTO':dataGBFormat.totalcomisionasesoria  });
+        resultComision.push({ 'id_mov':17,'MOV':'Liquidación','MONTO':montoaliquidar });
+        resultComision.push({ 'id_mov':999,'MOV':'abonototal','MONTO':sumaCargosAbonos.data[0].entr });
+        resultComision.push({ 'id_mov':998,'MOV':'cargototal','MONTO':sumaCargosAbonos.data[0].sal });
+        
+
+        return {
+            status:true,
+            xdataGastoComisionLiquida: resultComision
+        }
+
+    } catch (error) {
+
+        console.log('preparamosInfo_VistaComisionPorCuenta::',error.message);
+        return {
+            status : false,
+            message : 'Problemas con la información.'
+        }
+    }
+
+    
+}
+
+async function comisionCtaCte_PorDiaLiquidacion(xFecha) {
+    try {
+         
+        let dataInfo;
+        let dataCuenta = [];
+
+        if(parseInt(xFecha) !== 0 && xFecha !== '') {
+
+            dataInfo = await getInfoCtaCte(0,xFecha);
+            // console.log('dataInfo:::',dataInfo);
+            if(dataInfo.status) {
+                
+                for(let arr in dataInfo.data) {
+
+                    let data = await preparamosInfo_VistaComisionPorCuenta(parseInt(dataInfo.data[arr].numcta));                    
+
+                    dataCuenta.push({'numcta':dataInfo.data[arr].numcta
+                        ,'comi_admin':dataInfo.data[arr].comi_admin
+                        ,'montoadmin':data.xdataGastoComisionLiquida[0].MONTO
+                        ,'comi_asesoria':dataInfo.data[arr].comi_asesoria
+                        ,'montoasesoria':data.xdataGastoComisionLiquida[1].MONTO
+                        ,'montoliq' :data.xdataGastoComisionLiquida[2].MONTO
+                        ,'abonototal' :data.xdataGastoComisionLiquida[3].MONTO
+                        ,'cargototal' :data.xdataGastoComisionLiquida[4].MONTO
+                    });
+
+                }
+
+                return {
+                    status :true,
+                    data: dataCuenta
+                }
+            }
+            else 
+            {
+                return {
+                    status :false,
+                    message : 'Problemas al preparar la información.'
+                }   
+            }            
+        }
+        else
+        {
+            return {
+                status :true,
+                data: 'Falta el parametro'
+            }
+        }
+
+    } catch (error) {
+
+        return {
+            status : false,
+            message : error.message
+        }
+        
+    }
+}
+
+
+async function getDataVista_ComisionPorCuenta(req,res) {
+
+    ssn = req.session;
+    let { xFecha } = req.query;
+    if(xFecha !== '') {
+        let rsp = await comisionCtaCte_PorDiaLiquidacion(xFecha);
+        if(rsp.status) {
+
+            return res.json({
+                status: true,
+                data:rsp.data,
+                nombreus : ssn.nombre
+            });
+        }
+        else 
+        {
+
+            return res.json({
+                status: false,
+                data:'Problemas al obtener la información, contacte a su administrador del sistema.',
+                nombreus : ssn.nombre
+            });
+
+        }
+    }
+    else
+    {
+        return res.json({
+            status: false,
+            data:'Falta el periodo de búsqueda, actualice la página e intente nuevamente.',
+            nombreus : ssn.nombre
+        });
+
+    }
+    
 }
 
 
@@ -1666,5 +1865,8 @@ module.exports = {
     getAbono,
     verificaAcumulaSaldo,
     getMontoAcumulado_EnContra_Favor,
-    getTotalCargos_TotalAbonos
+    getTotalCargos_TotalAbonos,
+    getInfoCtaCte,
+    comisionCtaCte_PorDiaLiquidacion,
+    getDataVista_ComisionPorCuenta
 }
