@@ -115,10 +115,10 @@ router.post('/liquidacion/getResumenCta', async(req, res) => {
         if(calculoAsesoria.status) {
             if(calculoAsesoria.data.length > 0) {
                 //comiAsesoria = calculoAsesoria.data[0].total_comi_asesor;
-                comiAsesoria = calculoComision.totalcomisionasesoria
+                comiAsesoria = calculoComision.totalcomisionasesoria;
                 porcentAsesoria = calculoAsesoria.data[0].comi_asesor;
-            }            
-        }        
+            }
+        }
 
         if (resultGastoGlobal.status) {
             resultGB = resultGastoGlobal.data;
@@ -126,19 +126,16 @@ router.post('/liquidacion/getResumenCta', async(req, res) => {
 
         if (resultCtaCte.status) {
 
-            // console.log('porcentAsesoria::',porcentAsesoria, ' comiAsesoria::',comiAsesoria);
-            // console.log('porcentAsesoria::',porcentAsesoria, ' comiAsesoria::',comiAsesoria);
-
             return res.json({
-                status: true,
-                message : 'Información correcta.',
-                dataOK  : resultCtaCte.data,
-                dataGB  : resultGB,
-                dataOAD : calculoComision.resultOAD,
-                totalcomisionAdministracion : calculoComision.totalComision,
-                porcComision : calculoComision.porcentComision,
-                comiAsesoria,
-                porcentAsesoria
+                    status: true,
+                    message : 'Información correcta.',
+                    dataOK  : resultCtaCte.data,
+                    dataGB  : resultGB,
+                    dataOAD : calculoComision.resultOAD,
+                    totalcomisionAdministracion : calculoComision.totalComision,
+                    porcComision : calculoComision.porcentComision,
+                    comiAsesoria,
+                    porcentAsesoria
             });
 
         } else {

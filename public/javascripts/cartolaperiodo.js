@@ -80,14 +80,14 @@
 
         var eCta = document.getElementById("sl_ctacte");
         var xCta = eCta.options[eCta.selectedIndex].value;
-        // var e = document.getElementById("sl_periodo");
-        // var xPeriodo = e.options[e.selectedIndex].value;
-        let xPeriodo = 'init';
+        var e = document.getElementById("sl_periodo");
+        var xPeriodo = e.options[e.selectedIndex].value;
+        // let xPeriodo = 'init';
 
         $.ajax({
             method: 'GET',        
             data: { 'nCtaCte':xCta, 'periodo':xPeriodo, 'cod':x },
-            url: '/liquidacion/getDetalleCuenta',
+            url: '/cartola/getDetalleMovimiento_Cartola',
             success: function (response) {
 
                 if(response.status) {
@@ -212,43 +212,43 @@
             $('#divOpcionSaldo').toggle(true);
             clearValores();
 
-            // $.ajax({
-            //     method: 'POST',        
-            //     data: {'nCtaCte' : nCtaCte},
-            //     url: '/liquidacion/getPeriodo',
-            //     success: function (response) {
+            $.ajax({
+                method: 'POST',        
+                data: {'nCtaCte' : nCtaCte},
+                url: '/liquidacion/getPeriodo',
+                success: function (response) {
 
-            //         if(response.status)
-            //         {
-            //             let html = '<option selected="selected" value="init">-- Periodo actual --</option>';
+                    if(response.status)
+                    {
+                        let html = '<option value="init">-- Selecciona Periodo --</option>';
 
-            //             for(let reg in response.dataOK)
-            //             {   
-            //                 html += '<option value="'+response.dataOK[reg].periodo+'">'+response.dataOK[reg].periodo+'</option> ';                        
-            //             }
+                        for(let reg in response.dataOK)
+                        {   
+                            html += '<option value="'+response.dataOK[reg].periodo+'">'+response.dataOK[reg].periodo+'</option> ';                        
+                        }
 
-            //             $('#sl_periodo').html(html);
-            //             $('#sl_periodo').selectpicker('refresh');
+                        $('#sl_periodo').html(html);
+                        $('#sl_periodo').selectpicker('refresh');
 
-            //             //Marcamos el radio correspondeiente a saldo acumulado (si/no)
-            //             (parseInt(response.dataConfigSaldoAcum) === 1) ? $("#customRadioInline1").prop("checked", true) : $("#customRadioInline2").prop("checked", true);
+                        //Marcamos el radio correspondeiente a saldo acumulado (si/no)
+                        //(parseInt(response.dataConfigSaldoAcum) === 1) ? $("#customRadioInline1").prop("checked", true) : $("#customRadioInline2").prop("checked", true);
                         
-            //         }    
-            //         else
-            //         {
-            //             let html = response.message;
-            //             $('#txtResult').html(html);
-            //             $("#modalMessage").modal('show');
-            //         }           
-            //     }
-            // });
+                    }    
+                    else
+                    {
+                        let html = response.message;
+                        $('#txtResult').html(html);
+                        $("#modalMessage").modal('show');
+                    }           
+                }
+            });
         }
         else
         {
-            $('#divOpcionSaldo').toggle(false);
-            $("#customRadioInline2").prop("checked", true);
-            // document.getElementById("btnBorrador").hidden = true;
-            document.getElementById("btnGeneraLiq").hidden = true;
+            // $('#divOpcionSaldo').toggle(false);
+            // $("#customRadioInline2").prop("checked", true);
+            // // document.getElementById("btnCargo").hidden = true;
+            // document.getElementById("btnGeneraLiq").hidden = true;
             
             // let html = '<option selected="selected" value="init">-- Selecciona Cuenta Corriente --</option>';
             // $('#sl_periodo').html(html);
@@ -261,11 +261,10 @@
 
         var eCta = document.getElementById("sl_ctacte");
         var xCtaSelec = eCta.options[eCta.selectedIndex].value;
-        //var e = document.getElementById("sl_periodo");
-        //var xPeriodoSelec = e.options[e.selectedIndex].value;
-        let xPeriodoSelec = 'init';
+        var e = document.getElementById("sl_periodo");
+        var xPeriodoSelec = e.options[e.selectedIndex].value;
 
-        if(xCtaSelec.trim() != 'init' && xCtaSelec.trim() != '')
+        if(xCtaSelec.trim() != 'init' && xCtaSelec.trim() != '' && xPeriodoSelec != 'init' && xPeriodoSelec != '')
         {
             // if(xPeriodoSelec == 'init' || xPeriodoSelec == '') {
             //     // document.getElementById("btnCargo").hidden = false;
@@ -278,30 +277,27 @@
             // }
 
             document.getElementById("idLoad").hidden = false;            
-            document.getElementById("btnGeneraLiq").hidden = false;
-            // document.getElementById("btnBorrador").hidden = false;
+            // document.getElementById("btnGeneraLiq").hidden = false;
 
             $.ajax({
                 method: 'POST',        
                 data: {'nCtaCte' : xCtaSelec,'periodo':xPeriodoSelec},
-                url: '/liquidacion/getResumenCta',
-                success: function (response) {     
-                    
+                url: '/cartola/getResumenCta',
+                success: function (response) {
+
                     // console.log(response);
                     if(response.status)
                     {
                         //RESUMEN
                         let data = response.dataOK;
-                        let comisionAdmin = response.totalcomisionAdministracion;
                         let porceComision = response.porcComision;
                         let proceAsesoria = response.porcentAsesoria;
-                        let comiAsesoria = response.comiAsesoria;
                         let xHtml = '';
                         let i = 0;
                         let saldoFormat = 0;
                         let ingresoFormat = 0;
                         let egresoFormat = 0;
-                        
+
                         $('#valEnContra').html('$ 0');
                         $('#valAcum').html('$ 0');
 
@@ -312,34 +308,30 @@
                             ingresoFormat += parseInt(data[reg].INGRESOS);
                             egresoFormat += parseInt(data[reg].EGRESOS);
                             xHtml += `<tr>
-                                        <th scope="row">`+ i +`</th>                          
+                                        <th scope="row">`+ i +`</th>
                                         <td class="titulos">  <a title="Ver detalle" class="text-primary" onclick="verInfo('` + data[reg].COD +`','`+data[reg].INMUEBLE + `')" style="cursor:pointer;">` + data[reg].INMUEBLE + ` </a> </td>
-                                        <td> ` + data[reg].ARRENDATARIO+`</td>
+                                        <td> <div style="width:90%;">` + data[reg].ARRENDATARIO+`</div></td>
                                         <td> $ ` + separadorMiles(data[reg].INGRESOS) + `</td> 
                                         <td> $ ` + separadorMiles(data[reg].EGRESOS) + `</td> 
-                                        <td style="`+(parseInt(data[reg].TOTAL_RESUMEN) < 0 ? 'color:#F40E26':'')+`"> $ ` + separadorMiles(data[reg].TOTAL_RESUMEN)+`</td>                                        
+                                        <td style="`+(parseInt(data[reg].TOTAL_RESUMEN) < 0 ? 'color:#F40E26':'')+`"> $ ` + separadorMiles(data[reg].TOTAL_RESUMEN)+`</td>
                                     </tr> `;
 
                         } /** FIN FOR data */
 
                         /** FOOTER TABLA RESUMEN */
                         let xFooter = `<div class="col-12 col-md-8"><b>Total</b> </div>
-                                       <div class="col-1 col-md-4">
+                                        <div class="col-1 col-md-4">
                                             <div class="row">                                                
                                                 <div class="col-4" style="text-align:center;"><b>$` + separadorMiles(ingresoFormat) +`</b></div>                 
                                                 <div class="col-4" style="text-align:center;"><b>$` + separadorMiles(egresoFormat) +`</b></div>
                                                 <div class="col-4" style="text-align:center;"><b>$` + separadorMiles(saldoFormat) +`</b></div>        
                                             </div>
-                                       </div>
-                                        
+                                        </div>
                                      `;
 
-                                    //  <div class="col-sm-2"><b>Ab. $` + separadorMiles(ingresoFormat) +`</b></div>                 
-                                    //     <div class="col-sm-2"><b>Car. $` + separadorMiles(egresoFormat) +`</b></div>
-                                    //     <div class="col-sm-2"><b>Sal. $` + separadorMiles(saldoFormat) +`</b></div>
-                                    // <div class="col-sm-3" ><b>A. $ ` + separadorMiles(ingresoFormat) +`</b></div>                 
-                                    // <div class="col-sm-3" ><b>C. $ ` + separadorMiles(egresoFormat) +`</b></div>
-                
+                                    // <div class="col-sm-3" ><b>Ingresos: $ ` + separadorMiles(ingresoFormat) +`</b></div>
+                                    // <div class="col-sm-3" ><b>Egresos: $ ` + separadorMiles(egresoFormat) +`</b></div>
+
                         $('#rs_footertotal').html(xFooter);
                         $('#xResumen').html(xHtml);
 
@@ -353,25 +345,23 @@
                         // let calcComision = 0;
                         // let calcLiquidacion = 0;
                         // let totalItems = 0;
-                        
+
                         for(let regGB in dataGB)
-                        {                            
+                        {     
 
                             /* 
-                                6 - Comisión Administración  
-                                ||  17 - Cargo por Liquidación  
-                                || 41 - Comisiones 
+                                6 - Comisión Administración
+                                ||  17 - Cargo por Liquidación
+                                || 41 - Comisiones
                                 || 37 - Saldo a favor acumulado
                                 || 38 - Saldo en contra acumulado
                             */
-                            if(parseInt(dataGB[regGB].id_mov) != 6 
-                                && parseInt(dataGB[regGB].id_mov) != 17 
-                                && parseInt(dataGB[regGB].id_mov) != 41 
-                                && parseInt(dataGB[regGB].id_mov) != 37 
+                            if(
+                                parseInt(dataGB[regGB].id_mov) != 37 
                                 && parseInt(dataGB[regGB].id_mov) != 38 
                                 )
-                            {
-                                
+                            {                                
+
                                 if(dataGB[regGB].genera == 'entrada')
                                 {
                                     saldoTotal += parseInt(dataGB[regGB].MONTO);
@@ -384,29 +374,36 @@
                                 x++;
                                 xHtmlGB += `
                                         <tr>          
-                                            <th scope="row">`+ x +`</th>                          
+                                            <th scope="row">`+ x +`</th>
                                             <td>` + dataGB[regGB].FECHA+`</td>
-                                            <td title='` + dataGB[regGB].glosa + `'>` + dataGB[regGB].MOV+`</td>  
+                                            <td title='` + dataGB[regGB].glosa + `'><div style="width:70%;"> ` + dataGB[regGB].MOV +` `+ ((parseInt(dataGB[regGB].id_mov) == 17) ? `( Depósito )` :``) +` </div></td>
                                             <td>$ ` + separadorMiles((dataGB[regGB].genera == 'entrada'? dataGB[regGB].MONTO : 0)) +`</td>
-                                            <td>$ ` + separadorMiles((dataGB[regGB].genera == 'salida'?  dataGB[regGB].MONTO : 0)) +`</td>    
+                                            <td>$ ` + separadorMiles((dataGB[regGB].genera == 'salida'?  dataGB[regGB].MONTO : 0)) +`</td>
                                             <td>$ ` + separadorMiles(saldoTotal) +`</td>
-                                        </tr> `;          
+                                        </tr>
+                                        `;          
 
                                         // <td>$ ` + separadorMiles((dataGB[regGB].genera == 'entrada'? dataGB[regGB].MONTO : 0)) +`</td>
                                         //     <td>$ ` + separadorMiles((dataGB[regGB].genera == 'salida'?  dataGB[regGB].MONTO : 0)) +`</td>
                             }
 
-                            
-                            //SALDOS ACUMULADOS
-                            if(parseInt(dataGB[regGB].id_mov) === 37 ) {
-                                $('#valAcum').html('$ ' + separadorMiles(dataGB[regGB].MONTO));
-                            }
+                            // <tr>          
+                            //                 <th scope="row">`+ x +`</th>                          
+                            //                 <td>` + dataGB[regGB].FECHA+`</td>
+                            //                 <td title='` + dataGB[regGB].glosa + `'>` + dataGB[regGB].MOV +` `+ ((parseInt(dataGB[regGB].id_mov) == 17) ? `( Depósito )` :``) +` </td>                                            
+                            //                 <td>$ ` + separadorMiles(dataGB[regGB].MONTO) +`</td>
+                            //             </tr> 
 
-                            //SALDOS ACUMULADOS EN CONTRA...
-                            if(parseInt(dataGB[regGB].id_mov) === 38) {
+                            //SALDOS ACUMULADOS
+                            // if(parseInt(dataGB[regGB].id_mov) === 37 ) {
+                            //     $('#valAcum').html('$ ' + separadorMiles(dataGB[regGB].MONTO));
+                            // }
+
+                            // //SALDOS ACUMULADOS EN CONTRA...
+                            // if(parseInt(dataGB[regGB].id_mov) === 38) {
                                 
-                                $('#valEnContra').html('$ ' + separadorMiles(dataGB[regGB].MONTO));
-                            }
+                            //     $('#valEnContra').html('$ ' + separadorMiles(dataGB[regGB].MONTO));
+                            // }
                             // else //OBTIENE EL VALOR DE COMISION Y MONTO LIQUIDADO INGRESADO EN MQSIS
                             // {
                             //     if(parseInt(dataGB[regGB].id_mov) == 6)    
@@ -425,35 +422,32 @@
                         if(x > 0) {
                             $('#xResumenGB').html(xHtmlGB);
 
-                            let xFooterMg = `<div class="col-sm-5"><b>Total</b> </div>
-                                <div class="col-sm-6">
-                                    <div class="row">
-                                        <div class="col-sm-1" ></div>
-                                        <div class="col-sm-3" style="text-align:center;"><b>$ ` + separadorMiles(totalIng) +`</b></div>
-                                        <div class="col-sm-4" style="text-align:center;"><b>$ ` + separadorMiles(totalSal) +`</b></div>
-                                        <div class="col-sm-3" style="text-align:center;"><b>$ ` + separadorMiles(saldoTotal) +`</b></div>
-                                    </div>
-                                </div>                                
+                            let xFooterMg = `<div class="col-sm-6"><b>Total</b> </div>
+                            <div class="col-sm-6">
+                                <div class="row">
+                                    
+                                    <div class="col-sm-3" style="text-align:center;"><b>$ ` + separadorMiles(totalIng) +`</b></div>
+                                    <div class="col-sm-4" style="text-align:center;"><b>$ ` + separadorMiles(totalSal) +`</b></div>
+                                    <div class="col-sm-3" style="text-align:center;"><b>$ ` + separadorMiles(saldoTotal) +`</b></div>
+                                </div>
+                            </div>  
                              `;
-                            //  <div class="col-sm-2" ><b>$ ` + separadorMiles(totalIng) +`</b></div>                 
-                            //     <div class="col-sm-2" ><b>$ ` + separadorMiles(totalSal) +`</b></div>
-                            //     <div class="col-sm-2" ><b>$ ` + separadorMiles(saldoTotal) +`</b></div>
 
-                                // <div class="col-sm-3" ><b>Ingresos: $ ` + separadorMiles(totalIng) +`</b></div>                 
-                                // <div class="col-sm-3" ><b>Egresos: $ ` + separadorMiles(totalSal) +`</b></div>
+                            //     // <div class="col-sm-3" ><b>Ingresos: $ ` + separadorMiles(totalIng) +`</b></div>                 
+                            //     // <div class="col-sm-3" ><b>Egresos: $ ` + separadorMiles(totalSal) +`</b></div>
 
                             $('#mg_footertotal').html(xFooterMg);
 
                         }
                         
                         /** TOTAL ASESORIA */
-                        $('#val_asesoria').html(`<b><p class="text-secondary">$ ` + separadorMiles(comiAsesoria) + `</p></b>`);
-                        $('#txtPorcentAsesoria').html('<b><p>Comisión Asesoria (' + proceAsesoria + '%)</p></b>');
+                        // $('#val_asesoria').html(`<b><p class="text-secondary">$ ` + separadorMiles(comiAsesoria) + `</p></b>`);
+                        // $('#txtPorcentAsesoria').html('<b><p>Comisión Asesoria (' + proceAsesoria + '%)</p></b>');
 
                         /** TOTAL LIQUIDACION */
-                        $('#val_comis').html(`<b><p class="text-secondary">$ ` + separadorMiles(comisionAdmin) + `</p></b>`);
-                        $('#txtPorcentComision').html('<b><p>Comisión Administración (' + porceComision + '%) + IVA</p></b>');
-                        $('#val_liq').html(`<b> $ ` + separadorMiles(parseInt(saldoFormat) - parseInt(comisionAdmin) + parseInt(saldoTotal) - parseInt(comiAsesoria)) +  `</b> `);                        
+                        //$('#val_comis').html(`<b><p class="text-secondary">$ ` + separadorMiles(comisionAdmin) + `</p></b>`);
+                        //$('#txtPorcentComision').html('<b><p>Comisión Administración (' + porceComision + '%) + IVA</p></b>');
+                        //$('#val_liq').html(`<b> $ ` + separadorMiles(parseInt(saldoFormat) - parseInt(comisionAdmin) + parseInt(saldoTotal) - parseInt(comiAsesoria)) +  `</b> `);                        
 
                         document.getElementById("idLoad").hidden = true;
                     }
@@ -464,8 +458,7 @@
                         $('#txtResult').html(hmlError);
                         $("#modalMessage").modal('show');     
                         document.getElementById("idLoad").hidden= true;
-                        document.getElementById("btnGeneraLiq").hidden = true;
-                        // document.getElementById("btnBorrador").hidden = true;
+                        document.getElementById("btnGeneraLiq").hidden = true;                        
                         
                     }
                 }
@@ -474,8 +467,7 @@
         else
         {            
             $("#btnGeneraLiq").attr("hidden",true);
-            // $("#btnBorrador").attr("hidden",true);
-            $('#txtResult').html('Debes seleccionar una cuenta corriente.');
+            $('#txtResult').html('Debes seleccionar una cuenta corriente y un periodo.');
             $("#modalMessage").modal('show');
         }
     });
@@ -534,33 +526,33 @@
 
     });
 
-    document.getElementById('btnSaveConfig').addEventListener('click', function () {
+    // document.getElementById('btnSaveConfig').addEventListener('click', function () {
 
-        var eCta = document.getElementById("sl_ctacte");
-        var xCtaSelec = eCta.options[eCta.selectedIndex].value;
+    //     var eCta = document.getElementById("sl_ctacte");
+    //     var xCtaSelec = eCta.options[eCta.selectedIndex].value;
 
-        var acumSal =  $("input[name=customRadioInline1]:checked").val();
+    //     var acumSal =  $("input[name=customRadioInline1]:checked").val();
 
-        $.ajax({
-                method: 'POST',
-                url: '/liquidacion/saveConfigAcumSaldo',
-                data:{ xCtaSelec,acumSal},
-                success: function (resp) {
+    //     $.ajax({
+    //             method: 'POST',
+    //             url: '/liquidacion/saveConfigAcumSaldo',
+    //             data:{ xCtaSelec,acumSal},
+    //             success: function (resp) {
                     
-                    if(resp.status)
-                    {                        
-                        $('#txtResult').html('Guardado Correctamente!!');
-                        $("#modalMessage").modal('show');    
-                    }
-                    else
-                    {                        
-                        $('#txtResult').html('Problemas al guardar...');
-                        $("#modalMessage").modal('show');
-                    }                    
-                }
-        });
+    //                 if(resp.status)
+    //                 {                        
+    //                     $('#txtResult').html('Guardado Correctamente!!');
+    //                     $("#modalMessage").modal('show');    
+    //                 }
+    //                 else
+    //                 {                        
+    //                     $('#txtResult').html('Problemas al guardar...');
+    //                     $("#modalMessage").modal('show');
+    //                 }                    
+    //             }
+    //     });
 
-    });
+    // });
 
     // document.getElementById('btnCargo').addEventListener('click', function () {
 

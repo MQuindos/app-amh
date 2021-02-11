@@ -1,66 +1,206 @@
 <style>
-.scroll {
-    max-height: 400px;
-    overflow-y: auto;
-}
+    .scroll {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .titulos{
+        color: #002f5f;    
+    }
 
-.titulos{
-    color: #002f5f;
-    
-}
-.tuit{
-    color:#00b0ca;
-}
+    .tuit{
+        color:#00b0ca;
+    }
+
 </style>
 
-
 <div class="container p-1">
-
+    
         <div class="row">    
             <div class="col-12 p-3">
-                <h5 class="font-weight-bold titulos text-center"><i> GENERAR CARTOLAS</i></h5>
+                <h5 class="font-weight-bold titulos text-center"><i>VER CARTOLA</i></h5>
             </div>
         </div>
 
-
-        <div class="row">
-            <div class="col-4 p-3">                
-                <button type="button" title="Crear cartolas" id="btnCreaCartola" class="btn btn-success btn-sm">Crear</button>
+        <div class="card">
+            <div class="card-header font-weight-bold titulos">
+                Cuenta Corriente
             </div>
-            <div class="col-6">
-                <div class="spinner-border" role="status" hidden="true" id="idLoadCartola">
-                        <span class="sr-only">Cargando...</span>
+            <div class="card-body">
+               <div class="row">            
+                    <div class="col-4">
+                                  
+                            <select class="selectpicker" id="sl_ctacte" data-live-search="true" data-width="80%" data-size="5" >
+                                <option value="init">-- Selecciona Cuenta Corriente --</option>
+                                {{#each dataCtaCte}}
+                                    <option data-tokens="{{codigo}}" value="{{codigo}}">{{codigo }} - {{nombrectacte}}</option>
+                                {{/each}}
+                            </select>
+                                            
+                    </div>
+                    
+                    <div class="col-4">
+                        <select class="selectpicker show-tick" id="sl_periodo" data-live-search="true" data-width="fit" data-size="5">
+                            <option value="init">-- Selecciona Periodo --</option>
+                        </select>      
+                    </div>
+                    <div class="col-1">
+                        <div class="spinner-border" role="status" hidden="true" id="idLoad">
+                          <span class="sr-only">Cargando...</span>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <button type="button" title="Mostrar información de Cuenta Corriente" id="btnEnviar" class="btn btn-success btn-sm">Mostrar</button>
+                    </div>
+               </div>
+                <hr>
+               {{!-- <div class="row" id="divOpcionSaldo" class="collapse" style="display:none">
+                   <div class="col-3">
+                       <b>Acumula saldo?</b>
+                   </div>
+                   <div class="col-2">
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="customRadioInline1" name="customRadioInline1" class="custom-control-input" value="1">
+                            <label class="custom-control-label" for="customRadioInline1">Si</label>
+                        </div>
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="customRadioInline2" name="customRadioInline1" class="custom-control-input" value="0" checked>
+                            <label class="custom-control-label" for="customRadioInline2">No</label>
+                        </div>
+                        
+                   </div>
+                   <div class="col-4">
+                       <button type="button" title="Guardar opción" id="btnSaveConfig" class="btn btn-success btn-sm">Guardar opción</button>
+                   </div>
+               </div>--}}
+            </div> 
+
+        </div>
+
+    <hr>
+        <div class="card">
+            <div class="card-header font-weight-bold titulos">
+                Resumen
+            </div>
+            <div class="card-body scroll">
+               <div class="row">
+                <div class="col-12">
+                    <div class="table-responsive-sm">
+                        <table class="table table-hover table-striped table-sm">
+                            <thead>
+                                <tr>
+                                    <th class="titulos" scope="col">#</th>
+                                    <th class="titulos" scope="col">Propiedad</th>
+                                    <th class="titulos" scope="col">Arrendatario</th>
+                                    <th class="titulos" scope="col">Abonos</th>
+                                    <th class="titulos" scope="col">Cargos</th>
+                                    <th class="titulos" scope="col">Saldo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="xResumen">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+               </div>
+            </div>
+            <div class="card-footer">
+                <div class="row" id="rs_footertotal">
+                    
                 </div>
             </div>
-            <div class="col-2">
+        </div>
 
+         <hr>
+
+        <div class="card">
+            <div class="card-header font-weight-bold titulos">
+                Movimientos Generales
             </div>
+            <div class="card-body scroll">
+               <div class="row">
+                   <div class="col-12">                   
+                        <div class="table-responsive-sm">
+                            <table class="table table-hover table-striped table-sm">
+                                <thead>
+                                    <tr>                            
+                                        <th class="titulos" scope="col">#</th>        
+                                        <th class="titulos" scope="col">Fecha</th>
+                                        <th class="titulos" scope="col">Item</th>                                        
+                                        <th class="titulos" scope="col">Abonos</th>
+                                        <th class="titulos" scope="col">Cargos</th>
+                                        <th class="titulos" scope="col">Total</th>                                    
+                                    </tr>
+                                </thead>
+                                <tbody id="xResumenGB">
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>   
+             <div class="card-footer">
+                <div class="row" id="mg_footertotal">
+                    
+                </div>
+            </div> 
+        </div>
+
+        {{!-- <div class="row">
+
+            <div class="col-10 text-secondary" id="txtPorcentAsesoria"> </div>
+            <div class="col-2" id="val_asesoria"></div>
 
         </div>
 
-
-    {{!-- </div> --}}
-    <hr>
-
         <div class="row">
-            <div class="table-responsive">
-            <table class="table table-hover table-sm">
-            <thead>
-                <tr>                    
-                    <th scope="col">Cta. Cte.</th>
-                    <th scope="col">Propietario</th>
-                    <th scope="col">Archivo</th>
-                    
-                </tr>
-            </thead>
-            <tbody id="xFileCartola">
-               
-            </tbody>
-            </table>
+            
+            <div class="col-10 text-secondary" id="txtPorcentComision"> </div>
+            <div class="col-2" id="val_comis"></div>
+            
+        </div>
+        <hr>
+        <div class="row">            
+                <div class="col-10"><b>Saldo Total</b></div>
+                <div class="col-2" id="val_liq"></div>
+        </div> --}}
+        <hr>
+        <div class="row">    
+            <div class="col-4 p-3">                
+                <button id="btnGeneraLiq" class="btn btn-success" hidden="true">Generar Cartola</button>
+                {{!-- <button id="btnCargo" class="btn btn-success" hidden="true" >Cargo</button> --}}
             </div>
-        </div> <!-- DIV ROW TABLE -->
+            <div class="col-1 p-3">
+                <div class="spinner-border" role="status" hidden="true" id="idLoadGeneraLiq">
+                    <span class="sr-only">Cargando...</span>
+                </div>
+            </div>
+            <div class="col-4 p-3">
+                <a href="" id="lnk_file" hidden="true" target="_blank" class="btn btn-info">Ver cartola</a>
+            </div>
+        </div>
+        
+        {{!-- <div id="divSaldoAcum" class="font-weight-bold titulos">
+                Saldos
+            </div>
+        
+        <div class="row p-2">
+            <div class="col-4">
+                <div > Saldo Acumulado</div>
+            </div>
+            <div class="col-4 ">
+                <div id="valAcum"></div>
+            </div>
+        </div>
+         <div class="row p-2">
+            <div class="col-4">
+                <div > Saldo Acumulado en Contra</div>
+            </div>
+            <div class="col-4">
+                <div  id="valEnContra"></div>
+            </div>
+        </div>                 --}}
+</div>
 
-
-</div> <!-- DIV CONTAINER-->
-
-<script src="../javascripts/cartola.js"></script>
+<script src="../javascripts/cartolaperiodo.js"></script>

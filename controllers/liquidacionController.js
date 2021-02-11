@@ -168,6 +168,7 @@ async function getResumenCtaCte_x_nCuenta(numCuenta, periodo) {
 
 async function getGastosGlobales_numCuenta(numCuenta, periodo) {
     try {
+        
         if (parseInt(numCuenta) > 9999) {
             let qFiltro = '';
             let qFiltroPeriodo = '';
@@ -312,6 +313,7 @@ async function getSaldoAcumulado_CuentaCorriente(xNumCuenta) {
 async function getDetalleMovimiento(numCuenta, periodo, cod) {
     try {
 
+        // console.log('Periodo::',periodo);
         if (parseInt(numCuenta) > 9999) {
             let qFiltro = '';
             let filtroArrenPropiedad = '';
@@ -340,8 +342,7 @@ async function getDetalleMovimiento(numCuenta, periodo, cod) {
             let qDetalle = `
                 SELECT TIPO, FECHA
                         ,   concat(PRO.direccion , ' ' , PRO.n_direccion , ' ' , PRO.unidad , ' ' , PRO.n_unidad) as PROPIEDAD
-                        ,   tmp_libro_arren_propiet.codigo as [N° CUENTA]
-                        /*, ISNULL(tm.nom_mov,'') as DESCRIPCION */
+                        ,   tmp_libro_arren_propiet.codigo as [N° CUENTA]                        
                         ,   CASE WHEN ISNULL(tm.nom_mov,'') = '' THEN td.nom_doc ELSE ISNULL(tm.nom_mov,'')END as DESCRIPCION
                         ,   case when GENERA = 'salida' then monto else 0 end as [CARGO]
                         ,   case when GENERA = 'entrada' then monto else 0 end as [ABONO]
@@ -382,6 +383,8 @@ async function getDetalleMovimiento(numCuenta, periodo, cod) {
                 ` + filtroArrenPropiedad + `
                 ORDER BY concat(PRO.direccion , ' ' , PRO.n_direccion , ' ' , PRO.unidad , ' ' , PRO.n_unidad),fchaFormat asc
             `;
+
+            // console.log('qDetalle::',qDetalle);
 
             let data = await pool1.query(qDetalle);
 

@@ -1,0 +1,66 @@
+<style>
+.scroll {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.titulos{
+    color: #002f5f;
+    
+}
+.tuit{
+    color:#00b0ca;
+}
+</style>
+
+
+<div class="container p-1">
+
+        <div class="row">    
+            <div class="col-12 p-3">
+                <h5 class="font-weight-bold titulos text-center"><i> VER CARTOLAS</i></h5>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-4 p-3">                
+                <button type="button" title="Crear cartolas" id="btnCreaCartola" class="btn btn-success btn-sm">Crear</button>
+            </div>
+            <div class="col-6">
+                <div class="spinner-border" role="status" hidden="true" id="idLoadCartola">
+                        <span class="sr-only">Cargando...</span>
+                </div>
+            </div>
+            <div class="col-2">
+
+            </div>
+
+        </div>
+
+
+    {{!-- </div> --}}
+    <hr>
+
+        <div class="row">
+            <div class="table-responsive">
+            <table class="table table-hover table-sm">
+            <thead>
+                <tr>                    
+                    <th scope="col">Cta. Cte.</th>
+                    <th scope="col">Propietario</th>
+                    <th scope="col">Archivo</th>
+                    
+                </tr>
+            </thead>
+            <tbody id="xFileCartola">
+               
+            </tbody>
+            </table>
+            </div>
+        </div> <!-- DIV ROW TABLE -->
+
+
+</div> <!-- DIV CONTAINER-->
+
+<script src="../javascripts/cartola.js"></script>

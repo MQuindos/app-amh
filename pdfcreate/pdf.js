@@ -869,6 +869,7 @@ async function createPDF(numCuenta, xPeriodo , xnombreUsuario) {
                 displayHeaderFooter: true,
                 headerTemplate: `<div style="font-size:7px;white-space:nowrap;margin-left:38px;">                                
                                     <span style="margin-left: 10px;"></span>
+                  
                                 </div>`,
                 footerTemplate: `<div style="font-size:7px;white-space:nowrap;margin-left:38px;width:100%;text-align:center;">
                                 Por Montalva Quindos - www.mq.cl - info@mq.cl

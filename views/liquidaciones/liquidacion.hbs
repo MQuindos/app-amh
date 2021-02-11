@@ -17,7 +17,7 @@
     
         <div class="row">    
             <div class="col-12 p-3">
-                <h5 class="font-weight-bold titulos text-center"><i> CARTOLA</i></h5>
+                <h5 class="font-weight-bold titulos text-center"><i> LIQUIDACIÓN</i></h5>
             </div>
         </div>
 
@@ -38,11 +38,11 @@
                                             
                     </div>
                     
-                    <div class="col-4">
+                    {{!-- <div class="col-4">
                         <select class="selectpicker show-tick" id="sl_periodo" data-live-search="true" data-width="fit" data-size="5">
                             <option selected="selected" value="init">-- Periodo actual --</option>
                         </select>      
-                    </div>
+                    </div> --}}
                     <div class="col-1">
                         <div class="spinner-border" role="status" hidden="true" id="idLoad">
                           <span class="sr-only">Cargando...</span>
@@ -91,9 +91,9 @@
                                     <th class="titulos" scope="col">#</th>        
                                     <th class="titulos" scope="col">Propiedad</th>                                    
                                     <th class="titulos" scope="col">Arrendatario</th>
-                                    {{!-- <th class="titulos" scope="col">Ingresos</th>
-                                    <th class="titulos" scope="col">Egresos</th> --}}
-                                    <th class="titulos" scope="col">Saldo a Liquidar</th>
+                                    <th class="titulos" scope="col">Abonos</th>
+                                    <th class="titulos" scope="col">Cargos</th>
+                                    <th class="titulos" scope="col">Saldo</th>
                                 </tr>
                             </thead>
                             <tbody id="xResumen">
@@ -128,8 +128,8 @@
                                         <th class="titulos" scope="col">Fecha</th>
                                         <th class="titulos" scope="col">Item</th>
                                         
-                                        {{!-- <th class="titulos" scope="col">Ingresos</th>
-                                        <th class="titulos" scope="col">Egresos</th> --}}
+                                        <th class="titulos" scope="col">Abonos</th>
+                                        <th class="titulos" scope="col">Cargos</th>
                                         <th class="titulos" scope="col">Saldo</th>                                    
                                     </tr>
                                 </thead>
@@ -169,8 +169,8 @@
         <hr>
         <div class="row">    
             <div class="col-4 p-3">                
-                <button id="btnGeneraLiq" class="btn btn-success" hidden="true">Generar Cartola</button>
-                {{!-- <button id="btnCargo" class="btn btn-success" hidden="true" >Cargo</button> --}}
+                <button id="btnGeneraLiq" class="btn btn-success" hidden="true">Generar Liquidación</button>
+                {{!-- <button id="btnBorrador" class="btn btn-primary" hidden="true" >Borrador Liquidación</button> --}}
             </div>
             <div class="col-1 p-3">
                 <div class="spinner-border" role="status" hidden="true" id="idLoadGeneraLiq">
