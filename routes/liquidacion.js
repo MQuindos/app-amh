@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 var session = require('express-session');
 const liquidacionController = require('../controllers/liquidacionController');
+const creaXlsx = require('../createExcel/dataLiquidacion');
+
 const pdfcreate = require('../pdfcreate/pdf');
 const fs = require('fs');
 const path = require("path");
@@ -251,5 +253,12 @@ router.get('/liquidacion/comisionCtaCtePorDiaLiquidacion',async(req,res) => {
 
 });
 
+
+router.get('/liquidacion/getDataExcel', async(req, res) => {
+
+        ssn = req.session;        
+        return await creaXlsx.getDataLiquidacion(req,res);         
+
+});
 
 module.exports = router;

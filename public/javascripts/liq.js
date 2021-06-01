@@ -592,3 +592,22 @@
     // });
 
 
+    
+     document.getElementById('btnBorrador').addEventListener('click', function () {
+
+        document.getElementById("idLoadGeneraLiq").hidden = false;
+        let cuenta = document.getElementById("sl_ctacte");
+        var xCtaSelec = cuenta.options[cuenta.selectedIndex].value;
+
+        $.ajax({
+                method: 'GET',
+                url: '/liquidacion/getDataExcel',
+                data:{ xCtaSelec },
+                success: function (resp) {
+
+                    console.log('respresp:: ',resp);
+                    
+                }
+        });
+
+    });
