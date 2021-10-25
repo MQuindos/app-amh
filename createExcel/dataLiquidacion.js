@@ -2,38 +2,73 @@
 
 const XLSX = require('xlsx');
 const fs = require('fs');
-
+const moment = require('moment');
+const path = require('path');
+const liquidacionCtller = require('../controllers/liquidacionController');
 
 async function getDataLiquidacion(req,res) {
 
     try {
+        moment.locale('es');
 
         let { xCtaSelec } = req.query;
         
         console.log('Llegamos::::::::::::::::');
 
-        let finalHeaders = ['colA', 'colB', 'colC'];
-        let data = [
-            [ { colA: 1, colB: 2, colC: 3 }, { colA: 4, colB: 5, colC: 6 }, { colA: 7, colB: 8, colC: xCtaSelec } ]
-            
-        ];
+        //Comprobamos exitencia de carpeta        
+        let folderFilePdf = '/public/download/borradorcartola/'+moment().format('MMMM-YYYY')+'/';        
+        let patCreate = path.join(process.cwd(),folderFilePdf);
+        let respues = await fs.promises.mkdir(patCreate, { recursive: true })
+
+        //Preparamos la data para la creacion del archivo...
         
+        let resumen = [];
+        let detalleMov = [];
+
+        let dataResumen = await liquidacionCtller.getResumenCtaCte_x_nCuenta(xCtaSelec,'init');
+        resumen = [dataResumen.data];
+
+        let detalleMovimiento = await liquidacionCtller.getDetalleMovimiento(xCtaSelec,'init','');
+        detalleMov = [detalleMovimiento.data];
+
+        let ws;
+        let wb;
+        resumen.forEach((array, i) => {
+            ws = XLSX.utils.json_to_sheet(array);
+            wb = XLSX.utils.book_new()
+            XLSX.utils.book_append_sheet(wb, ws, "Resumen")
+        });
+
+        detalleMov.forEach((array, i) => {
+            //ws = XLSX.utils.json_to_sheet(array,{finalHeadersX});
+            ws = XLSX.utils.json_to_sheet(array);
+            XLSX.utils.book_append_sheet(wb, ws, "Detalle Movimientos")
+        });
+
+        let namefile = moment().format('MMMM-YYYY')+`/BDOR_CTA_${xCtaSelec}_`+ moment().format('Hmmss')+`.xls`;
+        let exportFileName = path.join(__dirname,'../public/download/borradorcartola/'+namefile);
+        XLSX.writeFile(wb, exportFileName);
+
+
+
+/*
+let ws;
+        let wb;
         data.forEach((array, i) => {
-            // let ws = XLSX.utils.json_to_sheet(array, {header: finalHeaders});
-            // let wb = XLSX.utils.book_new()
-            // XLSX.utils.book_append_sheet(wb, ws, "SheetJS")
-            // let exportFileName = `C:\\\\Users\\mtoro\\OneDrive - Montalva Quindos\\Documents\\Otros\\workbook_${i}.xls`;
-            // //let exportFileName = `\\\\Mqvsfs01\\Ctas Ctes\\workbook_${i}.xls`;
-            // XLSX.writeFile(wb, exportFileName);
-
-            let ws = XLSX.utils.json_to_sheet(array, {header: finalHeaders});
-            let wb = XLSX.utils.book_new()
+            ws = XLSX.utils.json_to_sheet(array);
+            wb = XLSX.utils.book_new()
             XLSX.utils.book_append_sheet(wb, ws, "Liquidacion")
-            XLSX.utils.book_append_sheet(wb, ws, "Cartola")
-            let exportFileName = `C:\\\\Users\\mtoro\\OneDrive - Montalva Quindos\\Documents\\Otros\\workbook_${i}.xls`;
-            //let exportFileName = `\\\\Mqvsfs01\\Ctas Ctes\\workbook_${i}.xls`;
+            //XLSX.utils.book_append_sheet(wb, ws, "Cartola")
+            
+            let namefile = moment().format('MMMM-YYYY')+`/BDOR_CTA_${xCtaSelec}_`+ moment().format('Hmmss')+`.xls`;            
+            let exportFileName = path.join(__dirname,'../public/download/borradorcartola/'+namefile);
             XLSX.writeFile(wb, exportFileName);
+        });
+ */
 
+
+        return res.json({
+            status:true
         });
 
     } catch (error) {

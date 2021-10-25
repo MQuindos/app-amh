@@ -16,9 +16,9 @@
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav ">
       
-      <li class="nav-item ">
+      {{!-- <li class="nav-item ">
         <a class="nav-link font-weight-bold" href="/amh/home">AMH<span class="sr-only">(current)</span></a>
-      </li> 
+      </li>  --}}
       
        {{!-- <li class="nav-item">
         <a class="nav-link font-weight-bold" href="/liquidacion/info">LIQUIDACIONES <span class="sr-only">(current)</span></a>
@@ -32,15 +32,19 @@
           <a class="dropdown-item nav-link font-weight-bold" href="/cartola/vistagenerarcartola">Ver Cartola<span class="sr-only">(current)</span></a>
           <a class="dropdown-item nav-link font-weight-bold" href="/liquidacion/info"> Generar Liquidación<span class="sr-only">(current)</span></a>
           <a class="dropdown-item nav-link font-weight-bold" href="#">Liquidar Todos<span class="sr-only">(current)</span></a>
-          {{!-- <a class="dropdown-item nav-link font-weight-bold" href="/liquidacion/comisionCtaCte">Cargo Asesoría / Comisión Admin.<span class="sr-only">(current)</span></a> --}}
+          <a class="dropdown-item nav-link font-weight-bold" href="/liquidacion/comisionCtaCte">Cargo Asesoría / Comisión Admin.<span class="sr-only">(current)</span></a>
           
       </li>
       
     </ul>
     <hr>
+
+    <p>BBDD: <b>{{namebbdd}}</b> </p>
+
+    <hr>
     <a title="Cerrar Sesión" class="btn btn-sm btn-danger" href="/auth/destroysession"><i class="fas fa-sign-out-alt"></i> </a>
     {{#if (ne name_user "") }}
-      {{!-- <i class="fa fa-ellipsis-v ml-2" aria-hidden="true"></i>       --}}
+      {{!-- <i class="fa fa-ellipsis-v ml-2" aria-hidden="true"></i> --}}
       <p class="m-2 font-weight-bold position-relative" title="Usuario Logueado">
         <i>{{ name_user }}</i>
       </p>

@@ -20,7 +20,8 @@ router.get('/cartola/vistagenerarcartola', async(req, res) => {
     return res.render('cartola/cartola', {
         name_user: ssn.nombre,
         nombrelog: 'ssd',
-        dataCtaCte: (resultCtaCte.status ? resultCtaCte.data : null)
+        dataCtaCte: (resultCtaCte.status ? resultCtaCte.data : null),
+        namebbdd:process.env.SERVERBD
     });
 
 });

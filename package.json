@@ -8,6 +8,7 @@
     },
     "dependencies": {
         "bootstrap-select": "^1.13.18",
+        "chalk": "^4.1.1",
         "child_process": "^1.0.2",
         "cookie-parser": "~1.4.4",
         "debug": "~2.6.9",

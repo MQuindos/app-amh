@@ -5,8 +5,8 @@ const liquidacionController = require('../controllers/liquidacionController');
 const creaXlsx = require('../createExcel/dataLiquidacion');
 
 const pdfcreate = require('../pdfcreate/pdf');
-const fs = require('fs');
-const path = require("path");
+// const fs = require('fs');
+// const path = require("path");
 
 var ssn;
 
@@ -17,7 +17,8 @@ router.get('/liquidacion/info', async(req, res) => {
     return res.render('liquidaciones/liquidacion', {
         name_user: ssn.nombre,
         nombrelog: 'ssd',
-        dataCtaCte: (resultCtaCte.status ? resultCtaCte.data : null)
+        dataCtaCte: (resultCtaCte.status ? resultCtaCte.data : null),
+        namebbdd:process.env.SERVERBD
     });
 
 });
@@ -169,8 +170,6 @@ router.get('/liquidacion/getFilePdf', async(req, res) => {
         let resp = await pdfcreate.createPDF( xCtaSelec, xPeriodoSelec, ssn.nombre);
         let respComprobante = await pdfcreate.createComprobanteCargoLiquidacion(xCtaSelec);
 
-        console.log('resp::',resp);
-        
         return res.json({
             status:resp.status,
             pathfile:resp.pathPdf,
@@ -242,6 +241,7 @@ router.get('/liquidacion/comisionCtaCte',async(req,res) => {
     return res.render('liquidaciones/comisionctas', {
         name_user: ssn.nombre,
         nombrelog: 'ssd',
+        namebbdd:process.env.SERVERBD
         //data:respDetalle.data
     });
 

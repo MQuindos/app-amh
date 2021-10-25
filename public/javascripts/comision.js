@@ -5,20 +5,22 @@ function separadorMiles(val) {
     document.getElementById('btnBuscar').addEventListener('click', function () {
 
         var eCta = document.getElementById("sl_dialiquidacion");
-        var xFecha = eCta.options[eCta.selectedIndex].value;
+        var xDiaLiquidacion = eCta.options[eCta.selectedIndex].value;
 
         document.getElementById("idLoad").hidden = false;
+        document.getElementById("btnGenerarAsesoriaComision").hidden = true;
 
-        if(xFecha != 'init') {
+        if(xDiaLiquidacion != 'init') {
             $('#tbInfoLiquidacion').html('');
             
             $.ajax({
                 method: 'GET',
                 url: '/liquidacion/comisionCtaCtePorDiaLiquidacion',
-                data:{ xFecha },
+                data:{ xDiaLiquidacion },
                 success: function (resp) {
                     if(resp.status)
                     {
+                        document.getElementById("btnGenerarAsesoriaComision").hidden = false;
                         document.getElementById("idLoad").hidden = true;
                         let xHtmlTbLiqui = '';
                         let x = 0;
@@ -57,6 +59,7 @@ function separadorMiles(val) {
         {
 
             document.getElementById("idLoad").hidden = true;
+            document.getElementById("btnGenerarAsesoriaComision").hidden = true;
 
             $('#txtResult').html('Debe seleccionar fecha');
             $("#modalMessage").modal('show');

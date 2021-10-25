@@ -5,7 +5,7 @@ module.exports = {
     server: 'MQVSDB01',
     user: process.env.SERVERUSR,
     password: process.env.SERVERPASS,
-    database: 'MQSISX',
+    database: process.env.SERVERBD,
     options: {
         "encrypt": false,
         "enableArithAbort": false

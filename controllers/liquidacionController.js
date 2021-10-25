@@ -16,11 +16,13 @@ async function getListado_CtaCte() {
     try {        
 
         let rs = await pool1.connect(); // Obtenemos la conexion        
-        let qListado = `SELECT codigo, 
-             nombrectacte, cuentacerrada 
-             FROM cuentascorrientes 
-             WHERE cuentacerrada = 'NO' AND codigo < 50000             
-             ORDER BY codigo; `;
+        let qListado = `
+            SELECT codigo, 
+                nombrectacte, cuentacerrada 
+            FROM cuentascorrientes 
+            WHERE cuentacerrada = 'NO' 
+                AND codigo < 50000             
+            ORDER BY codigo; `;
 
         let data = await pool1.query(qListado);
 
@@ -71,11 +73,13 @@ async function getPeriodo_ctaCte(xNumCuenta) {
     }
 }
 
-/** 
+/**
  * RETORNA RESUMEN DE CTA CTE
  */
 async function getResumenCtaCte_x_nCuenta(numCuenta, periodo) {
     try {
+
+        console.log('LLEFAMOD getResumenCtaCte_x_nCuenta');
 
         if (parseInt(numCuenta) > 9999) {
             let qFiltro = '';
@@ -102,11 +106,14 @@ async function getResumenCtaCte_x_nCuenta(numCuenta, periodo) {
                     SELECT TIPO,CASE WHEN ARRENDATARIO = '' THEN 'Otros Movimientos' ELSE ARRENDATARIO END AS ARRENDATARIO 
                         ,CASE WHEN INMUEBLE = '' THEN 'Otros' ELSE INMUEBLE END AS INMUEBLE 
                         ,INGRESOS,EGRESOS,[SALDO A LIQUIDAR] as TOTAL_RESUMEN,COD
+                        ,CANON,MONEDA
                     FROM(
                         SELECT 'RESUMEN' as TIPO
                             ,	CONCAT(LTRIM(RTRIM(ARREN.nombres)), ' ',LTRIM(RTRIM(ARREN.apellido_pat)), ' ',LTRIM(RTRIM(ARREN.apellido_mat))) as ARRENDATARIO
                             ,	CONCAT(PRO.direccion , ' ' ,PRO.n_direccion , ' ' ,PRO.unidad , ' ' , PRO.n_unidad) as INMUEBLE
                             ,   CONCAT(PRO.cod_propiedad,ARREN.cod_arrendatario) as COD
+                            ,	MAX(CASE WHEN PRO.idtipomoneda = 1 THEN '$' ELSE 'UF' END) as MONEDA
+							,	MAX(ISNULL(PRO.precio,0)) as CANON
                             ,	SUM(case when genera = 'entrada' then monto else 0 end) as [INGRESOS]
                             ,	SUM(case when genera = 'salida' then monto else 0 end) as [EGRESOS]	
                             ,	SUM(case when genera = 'entrada' then monto else 0 end) - SUM(case when genera = 'salida' then monto else 0 end) AS [SALDO A LIQUIDAR] 			
@@ -138,8 +145,8 @@ async function getResumenCtaCte_x_nCuenta(numCuenta, periodo) {
                     Where /*LTRIM(RTRIM(ISNULL(ARRENDATARIO,''))) != '' */
 					LTRIM(RTRIM(ISNULL(INMUEBLE,''))) != ''
                     order by CASE WHEN INMUEBLE = '' THEN 'OTROS' ELSE INMUEBLE END asc; `;
-            // console.log('QUERY:::', qResumenCtaCte);
 
+            console.log('RESUMEN CUENTA:::', qResumenCtaCte);
             let data = await pool1.query(qResumenCtaCte);
 
             return {
@@ -237,13 +244,13 @@ async function getGastosGlobales_numCuenta(numCuenta, periodo) {
                     WHERE nulo IS NULL AND l.codigo = ` + numCuenta + ` AND isnull(monto,0) > 0 	
                         AND idmovcaj ` + qFiltro + ` AND l.cod_tipmovto not in (6,7,11,17,18,19,22,23,30,41,24,25,26,27,39,40)
                         AND case when isnull(l.cod_arrendatario,0) = 0 then isnull(tmp_prop_arrend.codarrendatario,'0') else isnull(l.cod_arrendatario,0) end = '0'
-                        AND isnull(l.cod_propiedad,'0') = '0'
+                        AND (isnull(l.cod_propiedad,'0') = '0' or isnull(l.cod_propiedad,'') = '')
                         ${ qFiltroPeriodo }
 
                 ) as tmp_libro_arren_propiet
                     LEFT JOIN propiedad PRO on PRO.cod_propiedad = tmp_libro_arren_propiet.cod_propiedad
                     LEFT JOIN arrendatario ARREN on ARREN.cod_arrendatario = tmp_libro_arren_propiet.cod_arrendatario
-                WHERE isnull(tmp_libro_arren_propiet.cod_propiedad,'0') = '0'                 
+                WHERE (isnull(tmp_libro_arren_propiet.cod_propiedad,'0') = '0' or isnull(tmp_libro_arren_propiet.cod_propiedad,'') = '')
                 `;
 
             // console.log('GASTOS GLOBALES:::',qGastos);
@@ -310,6 +317,7 @@ async function getSaldoAcumulado_CuentaCorriente(xNumCuenta) {
 
 }
 
+
 async function getDetalleMovimiento(numCuenta, periodo, cod) {
     try {
 
@@ -340,7 +348,7 @@ async function getDetalleMovimiento(numCuenta, periodo, cod) {
             }
 
             let qDetalle = `
-                SELECT TIPO, FECHA
+                SELECT distinct TIPO, FECHA
                         ,   concat(PRO.direccion , ' ' , PRO.n_direccion , ' ' , PRO.unidad , ' ' , PRO.n_unidad) as PROPIEDAD
                         ,   tmp_libro_arren_propiet.codigo as [N° CUENTA]                        
                         ,   CASE WHEN ISNULL(tm.nom_mov,'') = '' THEN td.nom_doc ELSE ISNULL(tm.nom_mov,'')END as DESCRIPCION
@@ -412,6 +420,7 @@ async function getDetalleMovimiento(numCuenta, periodo, cod) {
     }
 }
 
+
 async function getDetalleAbono(xidmovcaj)
 {
     try {
@@ -468,6 +477,7 @@ async function getDetalleAbono(xidmovcaj)
     
 }
 
+
 async function getInfoPropietario(xncta)
 {
     try {   
@@ -498,6 +508,7 @@ async function getInfoPropietario(xncta)
 
     }
 }
+
 
 async function guardaInfoPdfCreado(xusr,xncta,xop,xnamefile)
 {
@@ -1320,6 +1331,7 @@ async function getInfoCtaCte(xnumcta,xDiaLiq) {
     }
 }
 
+
 async function preparamosInfo_VistaComisionPorCuenta(numCuenta)
 {
     try {
@@ -1356,6 +1368,7 @@ async function preparamosInfo_VistaComisionPorCuenta(numCuenta)
 
     
 }
+
 
 async function comisionCtaCte_PorDiaLiquidacion(xFecha) {
     try {
@@ -1420,9 +1433,9 @@ async function comisionCtaCte_PorDiaLiquidacion(xFecha) {
 async function getDataVista_ComisionPorCuenta(req,res) {
 
     ssn = req.session;
-    let { xFecha } = req.query;
-    if(xFecha !== '') {
-        let rsp = await comisionCtaCte_PorDiaLiquidacion(xFecha);
+    let { xDiaLiquidacion } = req.query;
+    if(xDiaLiquidacion !== '') {
+        let rsp = await comisionCtaCte_PorDiaLiquidacion(xDiaLiquidacion);
         if(rsp.status) {
 
             return res.json({
@@ -1514,6 +1527,7 @@ async function saveCargos(xNumCuenta,xMonto,xCodMovto,xGlosa ) {
     }
 }
 
+
 async function updateCodBar_CargoxLiquidacion(xIdCod) {
     try {
         
@@ -1552,6 +1566,7 @@ async function updateCodBar_CargoxLiquidacion(xIdCod) {
         
     }
 }
+
 
 async function getCargos(idCargo) {
     try {
@@ -1672,6 +1687,7 @@ async function saveAbonos(xNumCuenta,xMonto,xCodMovto,xGlosa ) {
     }
 }
 
+
 async function updateCodBar_Abono(xIdCod) {
     try {
         
@@ -1710,6 +1726,7 @@ async function updateCodBar_Abono(xIdCod) {
         
     }
 }
+
 
 /**
  * Obtiene abono
@@ -1752,6 +1769,7 @@ async function getAbono(idAbono) {
         }
     }
 }
+
 
 async function verificaAcumulaSaldo(xNumCta) {
     try {
@@ -1799,6 +1817,7 @@ async function verificaAcumulaSaldo(xNumCta) {
         }
     }    
 }
+
 
 /**
  * Monto acumulado, ya sea a favor o en contra.

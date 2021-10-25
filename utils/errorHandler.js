@@ -21,7 +21,13 @@ function errorHandler (err, req, res, next) {
           message: err.message,
         }
       };
-    res.send(response);
+    // res.send(response);
+    return res.render('error', {
+      message: 'Recurso no encontrado, intente nuevamente.'
+      // error:{
+      //   status:false
+      // }      
+    });
   }
   next();
 }

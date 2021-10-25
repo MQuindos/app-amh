@@ -11,6 +11,13 @@
         color:#00b0ca;
     }
 
+thead tr th { 
+            position: sticky;            
+            top: -21px;
+            z-index: 10;
+            background-color: #ffffff;
+        }
+
 </style>
 
 <div class="container p-1">
@@ -49,7 +56,7 @@
                         </div>
                     </div>
                     <div class="col-2">
-                        <button type="button" title="Mostrar información de Cuenta Corriente" id="btnEnviar" class="btn btn-success btn-sm">Mostrar</button>
+                        <button type="button" title="Mostrar información de Cuenta Corriente" id="btnEnviar" class="btn btn-info btn-sm">Mostrar</button>
                     </div>
                </div>
                 <hr>
@@ -81,7 +88,7 @@
             <div class="card-header font-weight-bold titulos">
                 Resumen 
             </div>
-            <div class="card-body scroll">
+            <div class="card-body scroll" >
                <div class="row">            
                 <div class="col-12">                   
                     <div class="table-responsive-sm">
@@ -89,7 +96,8 @@
                             <thead>
                                 <tr>                            
                                     <th class="titulos" scope="col">#</th>        
-                                    <th class="titulos" scope="col">Propiedad</th>                                    
+                                    <th class="titulos" scope="col">Propiedad</th>   
+                                    <th class="titulos" scope="col">Canon</th>                                    
                                     <th class="titulos" scope="col">Arrendatario</th>
                                     <th class="titulos" scope="col">Abonos</th>
                                     <th class="titulos" scope="col">Cargos</th>
@@ -170,7 +178,7 @@
         <div class="row">    
             <div class="col-4 p-3">                
                 <button id="btnGeneraLiq" class="btn btn-success" hidden="true">Generar Liquidación</button>
-                <button id="btnBorrador" class="btn btn-primary" >Borrador Liquidación</button>
+                <button id="btnBorrador" class="btn btn-primary" hidden="true">Borrador Liquidación</button>
             </div>
             <div class="col-1 p-3">
                 <div class="spinner-border" role="status" hidden="true" id="idLoadGeneraLiq">

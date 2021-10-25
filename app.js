@@ -13,7 +13,7 @@ var multer = require('multer');
 var app = express();
 
 const authRouter = require('./routes/auth');
-const amhRouter = require('./routes/amh');
+// const amhRouter = require('./routes/amh');
 const liquidacionRouter = require('./routes/liquidacion');
 const initRouter = require('./routes/desktop');
 const cartolaRouter = require('./routes/cartola');
@@ -62,7 +62,7 @@ app.use(authRouter);
 //middleware
 app.use(authentication);
 app.use(initRouter);
-app.use(amhRouter);
+// app.use(amhRouter);
 app.use(liquidacionRouter);
 app.use(cartolaRouter);
 

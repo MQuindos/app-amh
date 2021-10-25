@@ -1,7 +1,9 @@
 
     function separadorMiles(val) {
-        return val.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ".");        
+        //return val.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ".");
+        return val.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ".");
     }
+    
 
     function clearValores()
     {
@@ -11,6 +13,8 @@
         $('#xResumenGB').html('');
         $('#mg_footertotal').html('');
         $('#xResumen').html('');       
+        $("#btnGeneraLiq").attr("hidden",true);
+        $("#btnBorrador").attr("hidden",true);
         
     }
 /*
@@ -99,9 +103,9 @@
                                     <th>#</th>
                                     <th>Fecha</th>
                                     <th>Tipo</th>
-                                    <th>Glosa</th>
-                                    <th>Cargo</th>
+                                    <th>Glosa</th>                                    
                                     <th>Abono</th>
+                                    <th>Cargo</th>
                                     <th>Saldo</th>
                                 </tr>
                             </thead>
@@ -154,14 +158,14 @@
                                 <td>`+response.data[reg].FECHA+`</td>
                                 <td>`+response.data[reg].DESCRIPCION+`</td>
                                 <td><p class="overflow-visible pclass">`+ response.data[reg].glosa +`</p></td>
-                                <td>`+ separadorMiles(cargo) +`</td>
                                 <td>`+ separadorMiles(abono) +`</td>
+                                <td>`+ separadorMiles(cargo) +`</td>
                                 <td>`+ separadorMiles(saldoDet) +`</td>
                             </tr>
                             <tr id="`+ iddatatarget+`" class="collapse">
                                 <td colspan="1" class="hiddenRow"></td>
-                                <td colspan="6" class="hiddenRow">                                    
-                                    <table class="table table-sm table-hover" >
+                                <td colspan="6" class="hiddenRow">
+                                    <table class="table table-sm table-hover">
                                         <thead>
                                             <tr>
                                                 <th class="pclass">N° Recibo</th>
@@ -170,14 +174,14 @@
                                                 <th class="pclass">Monto Pagado $</th>
                                                 <th class="pclass">Monto Pagado UF</th>
                                             </tr>
-                                        </thead>  
+                                        </thead>
                                         <tbody>
                                         `+
                                         bodyTableDetalle
                                         +
-                                        `                                            
+                                        `
                                         </tbody>
-                                    </table>                                    
+                                    </table>
                                 </td>
                             </tr>
                             `;
@@ -247,7 +251,7 @@
         {
             $('#divOpcionSaldo').toggle(false);
             $("#customRadioInline2").prop("checked", true);
-            // document.getElementById("btnBorrador").hidden = true;
+            document.getElementById("btnBorrador").hidden = true;
             document.getElementById("btnGeneraLiq").hidden = true;
             
             // let html = '<option selected="selected" value="init">-- Selecciona Cuenta Corriente --</option>';
@@ -279,7 +283,7 @@
 
             document.getElementById("idLoad").hidden = false;            
             document.getElementById("btnGeneraLiq").hidden = false;
-            // document.getElementById("btnBorrador").hidden = false;
+            document.getElementById("btnBorrador").hidden = false;
 
             $.ajax({
                 method: 'POST',        
@@ -287,7 +291,6 @@
                 url: '/liquidacion/getResumenCta',
                 success: function (response) {     
                     
-                    // console.log(response);
                     if(response.status)
                     {
                         //RESUMEN
@@ -312,8 +315,9 @@
                             ingresoFormat += parseInt(data[reg].INGRESOS);
                             egresoFormat += parseInt(data[reg].EGRESOS);
                             xHtml += `<tr>
-                                        <th scope="row">`+ i +`</th>                          
-                                        <td class="titulos">  <a title="Ver detalle" class="text-primary" onclick="verInfo('` + data[reg].COD +`','`+data[reg].INMUEBLE + `')" style="cursor:pointer;">` + data[reg].INMUEBLE + ` </a> </td>
+                                        <th scope="row">`+ i +`.</th>                          
+                                        <td class="titulos"><a title="Ver detalle" class="text-primary" onclick="verInfo('` + data[reg].COD +`','`+data[reg].INMUEBLE + `')" style="cursor:pointer;">` + data[reg].INMUEBLE + ` </a> </td>
+                                        <td> ` + data[reg].MONEDA + ` `  + (data[reg].MONEDA == 'UF'? data[reg].CANON: separadorMiles(data[reg].CANON) )+`</td>
                                         <td> ` + data[reg].ARRENDATARIO+`</td>
                                         <td> $ ` + separadorMiles(data[reg].INGRESOS) + `</td> 
                                         <td> $ ` + separadorMiles(data[reg].EGRESOS) + `</td> 
@@ -465,8 +469,7 @@
                         $("#modalMessage").modal('show');     
                         document.getElementById("idLoad").hidden= true;
                         document.getElementById("btnGeneraLiq").hidden = true;
-                        // document.getElementById("btnBorrador").hidden = true;
-                        
+                        document.getElementById("btnBorrador").hidden = true;
                     }
                 }
             });
@@ -474,7 +477,7 @@
         else
         {            
             $("#btnGeneraLiq").attr("hidden",true);
-            // $("#btnBorrador").attr("hidden",true);
+            $("#btnBorrador").attr("hidden",true);
             $('#txtResult').html('Debes seleccionar una cuenta corriente.');
             $("#modalMessage").modal('show');
         }
@@ -507,13 +510,13 @@
 
         // var e = document.getElementById("sl_periodo");
         // var xPeriodoSelec = e.options[e.selectedIndex].value;
-        let xPeriodoSelec = 'init';
+        //let xPeriodoSelec = 'init';
         document.getElementById("idLoadGeneraLiq").hidden = false;
 
         $.ajax({
                 method: 'GET',
                 url: '/liquidacion/getFilePdf',
-                data:{ xCtaSelec,xPeriodoSelec },
+                data:{ xCtaSelec,xPeriodoSelec:'init' },
                 success: function (resp) {
                     if(resp.status)
                     {
@@ -604,7 +607,7 @@
                 url: '/liquidacion/getDataExcel',
                 data:{ xCtaSelec },
                 success: function (resp) {
-
+                    document.getElementById("idLoadGeneraLiq").hidden = true;
                     console.log('respresp:: ',resp);
                     
                 }

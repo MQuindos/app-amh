@@ -20,7 +20,7 @@ router.get('/', async(req, res) => {
             token = req.cookies.authorization.trim();
         }
 
-        if (token == '') {
+        if (token.trim() == '') {
             let data = [];
             await userController.findAlls().then(function(result) {
                 for (let i = 0; i < result.length; i++) {
@@ -29,19 +29,24 @@ router.get('/', async(req, res) => {
                 }
             });
 
-            return res.render('auth/login', { xusuarios: data, flag: 'login' });
+            return res.render('auth/login', { xusuarios: data, flag: 'login',namebbdd:process.env.SERVERBD });
 
         } else {
             //res.redirect('/amh/home');            
-            return res.render('desktop/desktop', { name_user: ssn.nombre, nombrelog: 'ssd' });
+            return res.render('desktop/desktop', { name_user: ssn.nombre, nombrelog: 'ssd',namebbdd:process.env.SERVERBD });
         }
 
     } catch (error) {
 
         return res.json({
             mensaje: error.message,
-            status: false
+            status: false,
+            msg:'Estamos en auth routes.'
         });
+
+        // return res.render('error', {
+        //     message: 'Recurso no encontrado, intente nuevamente.'            
+        //   });
     }
 
 });
