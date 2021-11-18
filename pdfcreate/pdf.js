@@ -21,13 +21,15 @@ async function createComprobanteCargoLiquidacion(xNumCta) {
         let montoComisionAsesoria = 0;
         let totalCargosMenosAbonos = 0;
         let montoCargoComision = await liquidacion.comisiones_por_ctacte_periodoactual(numCuenta,'');
-        let sumaCargosAbonos = await liquidacion.getTotalCargos_TotalAbonos(numCuenta,'');
+        let sumaCargosAbonos = await liquidacion.getTotalCargos_TotalAbonos(numCuenta,'');        
         let calculoComision = await liquidacion.calculoComision(numCuenta,'');        
+        
         montoComisionAdmin = calculoComision.totalComision;
         montoComisionAsesoria = calculoComision.totalcomisionasesoria;
         totalCargosMenosAbonos = parseInt(sumaCargosAbonos.data[0].entr) - parseInt(sumaCargosAbonos.data[0].sal);        
 
-        let montoaliquidar = parseInt(totalCargosMenosAbonos - montoComisionAdmin - montoComisionAsesoria);        
+        let montoaliquidar = parseInt(totalCargosMenosAbonos - montoComisionAdmin - montoComisionAsesoria);
+
         //CARGO COMISION ADMINISTRACION
         let resppp;
         if(montoCargoComision.data[0].comi_admin > 0) {
@@ -739,17 +741,15 @@ async function getData(numCuenta,xPeriodo) {
         let dataGBFormat = await liquidacion.calculoComision(numCuenta,''); 
         let xdataRes = await liquidacion.getResumenCtaCte_x_nCuenta(numCuenta,xPeriodo);
         let xdataDetalle =  await liquidacion.getDetalleMovimiento(numCuenta,xPeriodo,'');
-        
+// console.log('DATA DETALLE getData() pdf.js:',xdataDetalle.data);
         let dataDetalleFormat = await formatDetalle(xdataDetalle.data);
-        
         let sumaCargosAbonos = await liquidacion.getTotalCargos_TotalAbonos(numCuenta,'');
 
         let montoComisionAdmin = dataGBFormat.totalComision;
         let montoComisionAsesoria = dataGBFormat.totalcomisionasesoria;
         let totalCargosMenosAbonos = parseInt(sumaCargosAbonos.data[0].entr) - parseInt(sumaCargosAbonos.data[0].sal);
-
         let montoaliquidar = parseInt(totalCargosMenosAbonos - montoComisionAdmin - montoComisionAsesoria);
-// console.log('totalCargosMenosAbonos::',totalCargosMenosAbonos);
+
         resultComision.push({ 'id_mov':6,'MOV':'Comisión Administración','MONTO':dataGBFormat.totalComision  });
         resultComision.push({ 'id_mov':41,'MOV':'Comisión Asesoria','MONTO':dataGBFormat.totalcomisionasesoria  });
         resultComision.push({ 'id_mov':17,'MOV':'Liquidación','MONTO':montoaliquidar });
@@ -762,7 +762,8 @@ async function getData(numCuenta,xPeriodo) {
             xdataGB: xdataGB.data,
             xdataRes: xdataRes.data,
             xdataDetalle: dataDetalleFormat,
-            xdataGastoComisionLiquida: resultComision
+            xdataGastoComisionLiquida: resultComision,
+            xdataDetalle_BY_GetIDS: xdataDetalle.data
         }
 
     } catch (error) {
@@ -835,9 +836,10 @@ const compile = async function(templateName, data) {
  * LIQUIDACION
  */
 async function createPDF(numCuenta, xPeriodo , xnombreUsuario) {
-    try {      
+    try {
+
         moment.locale('es');
-        let data = await getData(numCuenta, xPeriodo);        
+        let data = await getData(numCuenta, xPeriodo);
         //let pathRed = '\\\\mqvsfs01\\MQSIS\\SISX\\';
         let nameFilePdf = `liq_${numCuenta}_${moment().format('YYYYMMDD_HHmmss')}.pdf`;
 
@@ -847,9 +849,9 @@ async function createPDF(numCuenta, xPeriodo , xnombreUsuario) {
         //Informacion del propiedatario
         let rNombrePropietaro = await liquidacion.getInfoPropietario(numCuenta);
         if(result.status)
-        {            
+        {
             let folderFilePdf = '/public/download/comprobantes/'+moment().format('MMMM-YYYY')+'/';
-            let pathPdf = path.join(process.cwd(),folderFilePdf,nameFilePdf);        
+            let pathPdf = path.join(process.cwd(),folderFilePdf,nameFilePdf);
             
             let patCreate = path.join(process.cwd(),folderFilePdf);
             let respues = await fs.promises.mkdir(patCreate, { recursive: true })
@@ -875,8 +877,7 @@ async function createPDF(numCuenta, xPeriodo , xnombreUsuario) {
                 printBackground: true,
                 displayHeaderFooter: true,
                 headerTemplate: `<div style="font-size:7px;white-space:nowrap;margin-left:38px;">                                
-                                    <span style="margin-left: 10px;"></span>
-                  
+                                    <span style="margin-left: 10px;"></span>                  
                                 </div>`,
                 footerTemplate: `<div style="font-size:7px;white-space:nowrap;margin-left:38px;width:100%;text-align:center;">
                                 Por Montalva Quindos - www.mq.cl - info@mq.cl
@@ -891,12 +892,23 @@ async function createPDF(numCuenta, xPeriodo , xnombreUsuario) {
                     left: '10px'
                 }
             });
-
+            
             await browser.close();
+
+            // COMPROBAMOS SI TIENE REGISTROS EN RENDICION
+            let resp = await liquidacion.getInfo_RendicionEnvista_By_CuentaCorriente(numCuenta);
+            if(resp.rendiciondata.length > 0)
+            {
+                let respRendicionEnvista = await generaPdf_Rendicion_Envista(numCuenta);
+                console.log('Creamos el archivo rendicion::',respRendicionEnvista);
+            }
+            
 
             return {
                 status : true,
                 pathPdf : moment().format('MMMM-YYYY')+'/'+nameFilePdf,
+                dataById: data.xdataDetalle_BY_GetIDS,
+                periodo:moment().format('MMMM YYYY').toUpperCase(),
                 message:'Ok'
             }
         }
@@ -918,10 +930,93 @@ async function createPDF(numCuenta, xPeriodo , xnombreUsuario) {
     }
 }
 
-async function getInfoComisionesPorCuenta(xDiaLiq) {
 
-    
+/**
+ * Detalle rendicion envista para cartola 
+ */
+async function generaPdf_Rendicion_Envista(xNumCuenta)
+{
+    try {
+        
+        moment.locale('es');
+        let nameFilePdf = `rendicion_envista_${xNumCuenta}_${moment().format('YYYYMMDD_HHmmss')}.pdf`;
 
+
+        let respDataComisiones =  await getData(xNumCuenta,'');
+
+        console.log('generaPdf_Rendicion_Envista -> respDataComisiones::',respDataComisiones);
+        
+
+        //Buscamos informacion para crear el archivo con los movimientos de las rendiciones
+        let resp = await liquidacion.getInfo_RendicionEnvista_By_CuentaCorriente(xNumCuenta);
+
+        //Informacion del propiedatario
+        let rNombrePropietaro = await liquidacion.getInfoPropietario(xNumCuenta);
+
+        if(resp.status)
+        {
+            let folderFilePdf = '/public/download/comprobantes/'+moment().format('MMMM-YYYY')+'/';
+            let pathPdf = path.join(process.cwd(),folderFilePdf,nameFilePdf);
+            
+            let patCreate = path.join(process.cwd(),folderFilePdf);
+            let respues = await fs.promises.mkdir(patCreate, { recursive: true })
+
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+
+            let ress = {
+                idpdf : xNumCuenta,
+                nombrePropietario : rNombrePropietaro.nombrePropietario,
+                resu : resp.rendiciondata,                
+                periodoMes : moment().format('MMMM').toUpperCase()
+            }
+
+            const content = await compile('format_rendicion_envista',ress);
+            await page.setContent(content);
+
+            await page.pdf({
+                path: pathPdf,
+                format: '',
+                printBackground: true,
+                displayHeaderFooter: true,
+                headerTemplate: `<div style="font-size:7px;white-space:nowrap;margin-left:38px;">                                
+                                    <span style="margin-left: 10px;"></span>                  
+                                </div>`,
+                footerTemplate: `<div style="font-size:7px;white-space:nowrap;margin-left:38px;width:100%;text-align:center;">
+                                Por Montalva Quindos - www.mq.cl - info@mq.cl
+                                <span style="display:inline-block;float:right;margin-right:10px;">
+                                    <span class="pageNumber"></span> / <span class="totalPages"></span>
+                                </span>
+                            </div>`,
+                margin: {
+                    top: '10px',
+                    right: '18px',
+                    bottom: '38px',
+                    left: '10px'
+                }
+            });
+            
+            await browser.close();
+
+            return {
+                status : true,
+                pathPdf : moment().format('MMMM-YYYY')+'/'+nameFilePdf,
+                //dataById: data.xdataDetalle_BY_GetIDS,
+                periodo:moment().format('MMMM YYYY').toUpperCase(),
+                message:'Ok'
+            }
+        }
+
+
+    } catch (error) {
+
+        console.log('Error generaPdf_Rendicion_Envista < pdf.js > ',error.message);
+
+        return {
+            status : false,
+            message : error.message
+        }
+    }
 }
 
 module.exports = { 

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Liquidacion</title>
+    <title>Rendición Envista</title>
 
     <style type="text/css">
         body {
@@ -395,37 +395,39 @@
             </b>
         
 
-        <p style="text-align: center;"><b> <u>LIQUIDACIÓN - {{periodoMes}}</u> </b></p>
+        <p style="text-align: center;"><b> <u>RENDICIÓN ENVISTA - {{periodoMes}}</u> </b></p>
         
             <div class="container">
                 <p>
-                   Tenemos el agrado de hacer llegar su liquidacion, en caso de alguna consulta, no dude en comunicarse con su ejecutiva de cuenta.<br>                   
+                   Tenemos el agrado de hacer llegar su cartola, en caso de alguna consulta, no dude en comunicarse con su ejecutiva de cuenta.<br>                   
                 </p>
             </div>
 
              <br>
         
             <div class="container">
-                <h4><b>I.- Resumen movimientos propiedades </b></h4>
+                <h4><b>Rendición Envista </b></h4>
 
                 <table class="table">
                     <thead>
                         <tr>
                             <th scope="col">Propiedad</th>
                             <th scope="col">Arrendatario</th>
-                            <th scope="col">Ingresos</th>
-                            <th scope="col">Egresos</th>
-                            <th scope="col">Saldo a Liquidar</th>
+                            <th scope="col">Periodo</th>
+                            <th scope="col">Item</th>
+                            <th scope="col">Pagado</th>                            
+                            <th scope="col">Adeudado</th>
                         </tr>
                     </thead>
                     <tbody>                                    
                         {{#each resu}}
                             <tr>                                        
-                                <td>{{INMUEBLE}}</td>
-                                <td><div style="width: 250px;">{{ARRENDATARIO}}</div></td>
-                                <td>{{numberFormat INGRESOS}}</td>
-                                <td>{{numberFormat EGRESOS}}</td>
-                                <td>{{numberFormat TOTAL_RESUMEN}}</td>
+                                <td>{{c_propiedad}}</td>
+                                <td><div style="width: 250px;">{{a_arrendatario}}</div></td>
+                                <td>{{Periodo}}</td>
+                                <td>{{tipo}}</td>
+                                <td>{{numberFormat r_pagado}}</td>                                
+                                <td>{{numberFormat m_montodevengado}}</td>
                             </tr>
                         {{else}}
                             <tr>                                        
@@ -434,155 +436,14 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
+                                <td></td>
                             </tr>
                         {{/each}}
 
                     </tbody>
                 </table>        
-            </div>
-            
-        <br>
-        
-            <div class="container">
-                <h4><b>II.- Gastos generales </b></h4>
-
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Fecha</th>
-                            <th scope="col">Item</th>
-                            <th scope="col">Monto</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{#each gb}}
-
-                            {{#if (ne id_mov 6) }}
-                                {{#if (ne id_mov 17) }}
-                                    <tr>
-                                        <td>{{FECHA}}</td>
-                                        <td>{{MOV}}</td>
-                                        <td>{{numberFormat MONTO }}</td>
-                                    </tr>
-                                {{/if}}
-                            {{/if}}
-                        {{else}}
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        {{/each}}
-                    </tbody>
-                </table>        
-            </div>                  
-        
-            <br>        
-        
-            <div class="container">
-                <h4><b>III.- Detalle movimientos propiedades </b></h4>
-
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Fecha</th>
-                            <th scope="col">Propiedad</th>
-                            <th scope="col">Movimiento</th>
-                            <th scope="col">Cargo</th>
-                            <th scope="col">Abono</th>
-                            <th scope="col">Saldo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{#each det}}                         
-                            
-                            <tr>
-                                <th scope="row">{{ID}}</th>
-                                <td>{{FECHA}}</td>
-                                <td><div style="width: 200px;">{{PROPIEDAD}}</div></td>
-                                <td> <div style="width: 380px;"> {{DESCRIPCION}}</div></td>
-                                <td>{{numberFormat CARGO}}</td>
-                                <td>{{numberFormat ABONO}}</td>
-                                <td>{{numberFormat TOTALDETALLE }}</td>
-                            </tr>
-                        {{else}}
-                            <tr>
-                                <th scope="row"></th>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        {{/each}}
-                    </tbody>
-
-                </table>        
-            </div>
-        
+            </div>            
             <br>
-
-            <div class="container">
-                <h4>
-                    <b>IV.- Totales </b>
-                </h4>        
-                <table class="table">
-                    <tbody>
-                        <tr>
-                            <td>Comisión Administración</td>
-                            {{#each totalLiquidacionComision}}
-
-                            {{#if (eq id_mov 6) }} 
-                                    <td>{{numberFormat MONTO}}</td>
-                                </tr>
-                            {{/if}}
-                            
-                        {{else}}
-
-                                <td></td>
-                            </tr>
-                                
-                        {{/each}}   
-
-                        <tr>
-
-                        <td>Comisión Asesoria</td>
-                            {{#each totalLiquidacionComision}}
-
-                            {{#if (eq id_mov 41) }} 
-                                    <td>{{numberFormat MONTO}}</td>
-                                </tr>
-                            {{/if}}
-                            
-                        {{else}}
-
-                                <td></td>
-                            </tr>
-                                
-                        {{/each}} 
-
-
-                            <tr>
-                                <td><b>Monto a Liquidar</b></td>
-                        {{#each totalLiquidacionComision}}
-
-                            {{#if (eq id_mov 17) }}
-                                    
-                                        <td><b>{{numberFormat MONTO}}</b></td>
-                                    </tr>     
-                            {{/if}}
-                        {{else}}
-
-                                <td></td>
-                            </tr>   
-                        {{/each}}  
-                    </tbody>
-                </table>        
-            </div>
-        
-            <br><br>
         </div>
     </body>
 </html>

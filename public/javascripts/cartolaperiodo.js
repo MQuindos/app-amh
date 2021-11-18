@@ -221,10 +221,16 @@
                     if(response.status)
                     {
                         let html = '<option value="init">-- Selecciona Periodo --</option>';
+                        let periodoValida = '';
 
                         for(let reg in response.dataOK)
                         {   
-                            html += '<option value="'+response.dataOK[reg].periodo+'">'+response.dataOK[reg].periodo+'</option> ';                        
+                            if(periodoValida != response.dataOK[reg].periodo)
+                            {
+                                html += '<option value="'+response.dataOK[reg].periodo+'">'+response.dataOK[reg].periodo+'</option> ';
+                                periodoValida = response.dataOK[reg].periodo;
+                            }
+                            
                         }
 
                         $('#sl_periodo').html(html);

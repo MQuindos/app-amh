@@ -170,6 +170,11 @@ router.get('/liquidacion/getFilePdf', async(req, res) => {
         let resp = await pdfcreate.createPDF( xCtaSelec, xPeriodoSelec, ssn.nombre);
         let respComprobante = await pdfcreate.createComprobanteCargoLiquidacion(xCtaSelec);
 
+        let respRendicion = await liquidacionController.getInfo_RendicionEnvista_By_CuentaCorriente(xCtaSelec);
+        
+        //ENVIAMOS LOS IDS DE LOS REGISTROS DEL LIBRO CTACTE CON LOS QUE SE CREO LA CARTOLA,
+        let respIds = await liquidacionController.guardaIdCartolaCreado(resp.dataById,resp.periodo);
+
         return res.json({
             status:resp.status,
             pathfile:resp.pathPdf,

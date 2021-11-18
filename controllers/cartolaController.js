@@ -107,7 +107,7 @@ async function getResumenCtaCte_x_nCuentaYPeriodo(numCuenta, periodo) {
                                 from libro_ctacte
                                 WHERE  nulo IS NULL AND codigo = ${numCuenta}
                                     AND isnull(monto,0) > 0 
-                                    AND isnull(cod_arrendatario,0) != 0
+                                    --AND isnull(cod_arrendatario,0) != 0
                                     AND estado = 1
                                     AND YEAR(fecha) = ${anio}
                                     AND MONTH(fecha) = ${numMes}
@@ -128,9 +128,11 @@ async function getResumenCtaCte_x_nCuentaYPeriodo(numCuenta, periodo) {
                         ,concat(PRO.direccion , ' ' ,PRO.n_direccion , ' ' ,PRO.unidad , ' ' , PRO.n_unidad)
                         ,CONCAT(PRO.cod_propiedad,ARREN.cod_arrendatario)
                 ) as tem
-                Where LTRIM(RTRIM(ISNULL(INMUEBLE,''))) != ''
+                --Where LTRIM(RTRIM(ISNULL(INMUEBLE,''))) != ''
                 order by CASE WHEN INMUEBLE = '' THEN 'OTROS' ELSE INMUEBLE END asc;
             `;
+
+
             // console.log('QUERY CARTOLA:::', qResumenCtaCte);
 
             let data = await pool1.query(qResumenCtaCte);
